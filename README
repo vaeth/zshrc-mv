@@ -1,0 +1,46 @@
+(C) Martin Väth <martin@mvath.de>
+You can copy the zshrc file completely or partly, as you need.
+Comments are welcome.
+
+zshrc is a zsh initialization file (e.g. to be used as /etc/zshrc or ~/.zshrc)
+which activates a lot of zsh interactive features. In particular, all of
+
+https://github.com/hchbaw/auto-fu.zsh/
+https://github.com/zsh-users/zsh-syntax-highlighting
+https://github.com/vaeth/set_prompt/
+https://github.com/vaeth/termcolors/
+
+are initialized if available.
+
+Note that the zshrc file cares only about zsh specific features,
+not about "standard" variables, aliases, or functions which you would
+normally set in .profile, .bash_profile, or .bashrc:
+
+In particular, PATH etc. are expected to be complete when zshrc is sourced.
+
+Optionally, zshrc can source a separate file in which you can set things
+like aliases, functions or CDPATH for interactive usage in bash syntax.
+(You might want to source that separate file also from .bash_profile
+or .bashrc in an interactive bash.)
+If you want to make use of that feature, you must have set
+	interactive=/path/to/bashrc_file_for_interactive_mode
+when sourcing zshrc (or set it in the beginning of zshrc).
+
+Also some other paths are configurable if you have set
+	DEFAULTS=/path/to/local/configuration/files
+when you source zshrc. More precisely, if you define DEFAULTS,
+the following files are optionally used/included (if they exist):
+
+$DEFAULTS/DIR_COLORS{,-256}
+	These substitute /etc/DIR_COLORS{,-256} if available.
+	Download e.g. from https://github.com/vaeth/termcolors/
+
+$DEFAULTS/zsh/completion/
+	Can contain local zsh completion files
+
+$DEFAULTS/zsh/auto-fu.zsh
+	If no compiled auto-fu from https://github.com/hchbaw/auto-fu.zsh/
+	is found in a global path, this is used as a fallback.
+
+$DEFAULTS/zsh/zsh-syntax-highlighting.zsh
+	Fallback for https://github.com/zsh-users/zsh-syntax-highlighting
