@@ -6,11 +6,23 @@ zshrc is a zsh initialization file (e.g. to be used as /etc/zshrc or ~/.zshrc)
 which activates a lot of zsh interactive features. In particular, all of
 
 https://github.com/hchbaw/auto-fu.zsh/
-https://github.com/zsh-users/zsh-syntax-highlighting
+https://github.com/zsh-users/zsh-syntax-highlighting/
 https://github.com/vaeth/set_prompt/
-https://github.com/vaeth/termcolors/
+https://github.com/vaeth/termcolors-mv/
 
 are initialized if available.
+(For auto-fu.zsh use at least version 0.0.1.13 [only in git, branch pu].)
+
+For gentoo, ebuilds for this and all above packages can be found
+in the mv overlay (available via layman).
+
+Concerning the colors which zshrc sets, you will only be happy if you
+use a terminal with a black background (and the 256 colors are mainly
+tested with xterm - with other terminals e.g. the highlighted colors
+may look differently and maybe bad). My testing xresources for xterm contain:
+	XTerm*cursorColor: green
+	XTerm*background:  black
+	XTerm*foreground:  white
 
 Note that the zshrc file cares only about zsh specific features,
 not about "standard" variables, aliases, or functions which you would
@@ -33,7 +45,7 @@ the following files are optionally used/included (if they exist):
 
 $DEFAULTS/DIR_COLORS{,-256}
 	These substitute /etc/DIR_COLORS{,-256} if available.
-	Download e.g. from https://github.com/vaeth/termcolors/
+	Download e.g. from https://github.com/vaeth/termcolors-mv/
 
 $DEFAULTS/zsh/completion/
 	Can contain local zsh completion files
@@ -43,4 +55,4 @@ $DEFAULTS/zsh/auto-fu.zsh
 	is found in a global path, this is used as a fallback.
 
 $DEFAULTS/zsh/zsh-syntax-highlighting.zsh
-	Fallback for https://github.com/zsh-users/zsh-syntax-highlighting
+	Fallback for https://github.com/zsh-users/zsh-syntax-highlighting/

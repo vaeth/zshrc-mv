@@ -15,7 +15,7 @@ export SHELL=/bin/zsh
 () {
 	emulate -L sh
 	setopt kshglob noshglob braceexpand nonomatch
-	[[ -r $interactive ]] && source $interactive
+	[[ -r $interactive ]] && . $interactive
 }
 
 # Some pipe aliases which cannot be defined for bash:
@@ -63,9 +63,14 @@ unset HISTORYFILE
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
-[[ $(whence -w set_prompt) == *'function' ]] || . set_prompt.sh
-set_prompt -r
-. git_prompt.zsh
+() {
+	local i
+	i=$(whence -w set_prompt) && {
+		[[ "$i" == *'function' ]] || . set_prompt.sh
+		set_prompt -r
+		. git_prompt.zsh
+	}
+}
 
 
 # I want zmv and other nice features (man zshcontrib)
@@ -87,7 +92,8 @@ alias help=run-help
 
 
 # Define LS_COLORS if not already done in $interactive
-# (this must be done before setting the completion system colors):
+# (this must be done before setting the completion system colors).
+# I recommend https://github.com/vaeth/termcolors-mv/
 
 [[ -n $LS_COLORS ]] || () {
 	local -a files
@@ -589,17 +595,26 @@ alias -s VOB='$MOVIEPLAYER'
 # If auto-fu is not compiled it must be sourced before syntax-highlighting:
 # Activation is done after handling of syntax-highlighting:x-highlighting
 
-command -v auto-fu-init NIL || {
-	[[ ! -r /usr/share/zsh/site-contrib/auto-fu && -n $DEFAULTS && \
-		-r $DEFAULTS/zsh/auto-fu.zsh ]] && . $DEFAULTS/zsh/auto-fu.zsh
+whence auto-fu-init NUL || [[ -r /usr/share/zsh/site-contrib/auto-fu/auto-fu ]] || {
+	if [[ -r /usr/share/zsh/site-contrib/auto-fu/auto-fu.zsh ]]
+	then	. /usr/share/zsh/site-contrib/auto-fu/auto-fu.zsh
+	elif [[ -r $DEFAULTS/zsh/auto-fu.zsh ]]
+	then	. $DEFAULTS/zsh/auto-fu.zsh
+	fi
 }
 
 
 # Activate syntax highlighting from
-# https://github.com/zsh-users/zsh-syntax-highlighting
+# https://github.com/zsh-users/zsh-syntax-highlighting/
 #
 # Set colors according to a 256 color scheme if supported.
 # (We assume always a black background since anything else causes headache.)
+# This is tested with xterm and the following xresources:
+#
+# XTerm*cursorColor: green
+# XTerm*background:  black
+# XTerm*foreground:  white
+
 
 if [[ $#ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS -eq 0 ]] && is-at-least 4.3.9
 then	if [[ -r /usr/share/zsh/site-contrib/zsh-syntax-highlighting.zsh ]]
@@ -615,7 +630,7 @@ fi || {
 		main		# color syntax while typing (active by default)
 #		patterns	# color according to ZSH_HIGHLIGHT_PATTERNS
 		brackets	# color matching () {} [] pairs
-#		cursor		# color cursor position; not useful in my terms
+#		cursor		# color cursor; useless with cursorColor
 #		root		# color if you are root; seems broken
 	)
 	typeset -gUa ZSH_ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS
@@ -694,8 +709,7 @@ fi || {
 # auto-fu part 2:
 # If auto-fu is compiled it must be sourced after syntax-highlighting:
 
-whence auto-fu-init NUL || {
-	[[ -r /usr/share/zsh/site-contrib/auto-fu ]] || return 0
+whence auto-fu-init NUL || [[ ! -r /usr/share/zsh/site-contrib/auto-fu ]] || {
 	. /usr/share/zsh/site-contrib/auto-fu/auto-fu
 	auto-fu-install
 }
@@ -704,14 +718,16 @@ whence auto-fu-init NUL || {
 # auto-fu part 3:
 # initialize and activate auto-fu:
 
-zstyle ':auto-fu:highlight' input
-zstyle ':auto-fu:highlight' completion fg=yellow
-zstyle ':auto-fu:highlight' completion/one fg=green
-zstyle ':auto-fu:var' postdisplay # $'\n-azfu-'
-zstyle ':auto-fu:var' track-keymap-skip opp
-zstyle ':auto-fu:var' enable all
-zstyle ':auto-fu:var' disable magic-space
-zle-line-init() auto-fu-init
-zle -N zle-line-init
-zle -N zle-keymap-select auto-fu-zle-keymap-select
-zstyle ':completion:*' completer _complete
+! whence auto-fu-init NUL || {
+	zstyle ':auto-fu:highlight' input
+	zstyle ':auto-fu:highlight' completion fg=yellow
+	zstyle ':auto-fu:highlight' completion/one fg=green
+	zstyle ':auto-fu:var' postdisplay # $'\n-azfu-'
+	zstyle ':auto-fu:var' track-keymap-skip opp
+	zstyle ':auto-fu:var' enable all
+	zstyle ':auto-fu:var' disable magic-space
+	zle-line-init() auto-fu-init
+	zle -N zle-line-init
+	zle -N zle-keymap-select auto-fu-zle-keymap-select
+	zstyle ':completion:*' completer _complete
+}
