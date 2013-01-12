@@ -67,9 +67,10 @@ unset HISTORYFILE
 	local i
 	i=$(whence -w set_prompt) && {
 		[[ "$i" == *'function' ]] || . set_prompt.sh
-		set_prompt -r
-		. git_prompt.zsh
 	}
+} && {
+	set_prompt -r
+	. git_prompt.zsh
 }
 
 
