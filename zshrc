@@ -40,6 +40,7 @@ esac
 
 setopt noautocd autopushd cdablevars nochasedots nochaselinks
 setopt pathdirs autonamedirs bashautolist promptsubst nobeep nolistambiguous
+setopt listpacked
 setopt histignorealldups histreduceblanks histverify nohistexpand
 setopt extendedglob histsubstpattern
 setopt nodotglob nonomatch nonullglob numericglobsort noshglob
@@ -50,6 +51,9 @@ setopt nobgnice nocheckjobs nohup longlistjobs monitor notify
 NULLCMD=:
 READNULLCMD=less
 
+# Show time/memory for commands running longer than this number of seconds:
+REPORTTIME=5
+TIMEFMT='%J  %M kB %*E (user: %*U, kernel: %*S)'
 
 # Restore tty settings at every prompt:
 ttyctl -f
@@ -60,6 +64,7 @@ ttyctl -f
 SAVEHIST=${HISTSIZE:-1000}
 unset HISTORYFILE
 
+DIRSTACKSIZE=100
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
@@ -86,8 +91,7 @@ autoload -Uz pick-web-browser is-at-least
 # Initialize the helping system:
 
 HELPDIR="/usr/share/zsh/site-contrib/help"
-alias 'run-help'=
-unalias 'run-help'
+alias run-help NUL && unalias run-help
 autoload -Uz run-help
 alias help=run-help
 
