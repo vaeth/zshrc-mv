@@ -15,7 +15,7 @@ export SHELL=/bin/zsh
 () {
 	emulate -L sh
 	setopt kshglob noshglob braceexpand nonomatch
-	[[ -r $interactive ]] && . $interactive
+	[[ -f $interactive ]] && . "${interactive}"
 }
 
 # Some pipe aliases which cannot be defined for bash:
@@ -71,11 +71,13 @@ DIRSTACKSIZE=100
 () {
 	local i
 	i=$(whence -w set_prompt) && {
-		[[ "$i" == *'function' ]] || . set_prompt.sh
+		[[ "$i" == *'function' ]] || \
+			path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
+				$path) . set_prompt.sh
 	}
 } && {
 	set_prompt -r
-	. git_prompt.zsh
+	path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}} $path) . git_prompt.zsh
 }
 
 
@@ -90,10 +92,15 @@ autoload -Uz pick-web-browser is-at-least
 
 # Initialize the helping system:
 
-HELPDIR="/usr/share/zsh/site-contrib/help"
-alias run-help NUL && unalias run-help
-autoload -Uz run-help
-alias help=run-help
+for HELPDIR in ${DEFAULTS:+{^DEFAULTS%/}{/zsh,}/help} \
+	'/usr/share/zsh/site-contrib/help'
+do	[[ -d $HELPDIR ]] && {
+		alias run-help NUL && unalias run-help
+		autoload -Uz run-help
+		alias help=run-help
+		break
+	}
+done
 
 
 # Define LS_COLORS if not already done in $interactive
@@ -103,7 +110,7 @@ alias help=run-help
 [[ -n $LS_COLORS ]] || () {
 	local -a files
 	files=(
-		${DEFAULTS:+"${DEFAULTS}/DIR_COLORS"}
+		${DEFAULTS:+${^DEFAULTS%/}/DIR_COLORS}
 		"${HOME}/.dir_colors"
 		'/etc/DIR_COLORS'
 	)
@@ -131,8 +138,8 @@ zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
 if is-at-least 4.3.10
-then	zstyle ':completion:*' format "%B%F{yellow}%K{blue}%d%k%f%b"
-else	zstyle ':completion:*' format "%B%d%b"
+then	zstyle ':completion:*' format '%B%F{yellow}%K{blue}%d%k%f%b'
+else	zstyle ':completion:*' format '%B%d%b'
 fi
 
 # Make all-matches a widget which inserts all previous matches:
@@ -141,15 +148,23 @@ zstyle ':completion:all-matches:*' old-matches only
 zstyle ':completion:all-matches:*' completer _all_matches
 
 # Restrict cd selections:
-zstyle ':completion:*:cd:*' tag-order local-directories directory-stack named-directories path-directories
+zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-directories path-directories
 
 # Initialize the completion system
 whence compinit NUL || {
-	[[ -n $DEFAULTS && -d $DEFAULTS/zsh/completion ]] && \
-		fpath=("$DEFAULTS"/zsh/completion/***/(/) $fpath)
+	[[ -n $DEFAULTS ]] && () {
+		setopt localoptions nullglob
+		local -a d
+		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(/))
+		fpath=(${d%/} $fpath)
+	}
 	autoload -Uz compinit
 	compinit -D # -u -C
 }
+
+# Results from CDPATH usually produce confusing completions of cd:
+_my_cd() CDPATH= _cd "${@}"
+compdef _my_cd cd
 
 # mtools completion can hang, so we eliminate it:
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
@@ -157,10 +172,12 @@ compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mm
 # Some aliases or wrapper scripts behave like other commands:
 
 compdef mcd=cd
-compdef gpg.wrapper=gpg
-compdef knock=ssh
-compdef knock.ssh=knock
-compdef knock.mosh=knock
+whence gpg NUL && compdef gpg.wrapper=gpg
+whence ssh NUL && {
+	compdef knock=ssh
+	compdef knock.ssh=knock
+	compdef knock.mosh=knock
+}
 whence sudox NUL && {
 	compdef ssudox=sudox
 	compdef su=sudox
@@ -189,25 +206,25 @@ whence useflags NUL && {
 # Line editing during completion (man zshmodules: zsh/complist)
 
 zmodload zsh/complist
-bindkey -M menuselect "\C-M" accept-and-infer-next-history # Return
-bindkey -M menuselect "\M-\C-m" accept-and-hold            # Alt-Return
-bindkey -M menuselect "\C-Í" accept-and-hold               # Alt-Return
-bindkey -M menuselect "\e[[[sR" accept-and-hold            # Shift-Return
-bindkey -M menuselect "\e\C-m" accept-and-hold             # Esc-Return
-bindkey -M menuselect "\e- " accept-and-hold               # Esc Space
-bindkey -M menuselect "\M- " accept-and-hold               # Alt Space
-bindkey -M menuselect "\C- " accept-and-hold               # Ctrl-Space
-bindkey -M menuselect "\C-+" accept-and-hold               # Ctrl-+
-bindkey -M menuselect "\C-?" undo                          # Backspace
-bindkey -M menuselect "\C-." undo                          # Ctrl-.
-bindkey -M menuselect "\M-." undo                          # Alt-.
-bindkey -M menuselect "\e" send-break                      # Esc
-bindkey -M menuselect "\C-c" send-break                    # Ctrl-C
-bindkey -M menuselect "\e[5~" backward-word                # PgUp
-bindkey -M menuselect "\e[6~" forward-word                 # PgDn
-bindkey -M menuselect "\C-l" history-incremental-search-forward # Ctrl-L
-bindkey -M menuselect "\e[2~" vi-insert                    # insert
-bindkey -M menuselect "\e[[[[sI" vi-insert                 # shift-insert
+bindkey -M menuselect '\C-M' accept-and-infer-next-history # Return
+bindkey -M menuselect '\M-\C-m' accept-and-hold            # Alt-Return
+bindkey -M menuselect '\C-Í' accept-and-hold               # Alt-Return
+bindkey -M menuselect '\e[[[sR' accept-and-hold            # Shift-Return
+bindkey -M menuselect '\e\C-m' accept-and-hold             # Esc-Return
+bindkey -M menuselect '\e- ' accept-and-hold               # Esc Space
+bindkey -M menuselect '\M- ' accept-and-hold               # Alt Space
+bindkey -M menuselect '\C- ' accept-and-hold               # Ctrl-Space
+bindkey -M menuselect '\C-+' accept-and-hold               # Ctrl-+
+bindkey -M menuselect '\C-?' undo                          # Backspace
+bindkey -M menuselect '\C-.' undo                          # Ctrl-.
+bindkey -M menuselect '\M-.' undo                          # Alt-.
+bindkey -M menuselect '\e' send-break                      # Esc
+bindkey -M menuselect '\C-c' send-break                    # Ctrl-C
+bindkey -M menuselect '\e[5~' backward-word                # PgUp
+bindkey -M menuselect '\e[6~' forward-word                 # PgDn
+bindkey -M menuselect '\C-l' history-incremental-search-forward # Ctrl-L
+bindkey -M menuselect '\e[2~' vi-insert                    # insert
+bindkey -M menuselect '\e[[[[sI' vi-insert                 # shift-insert
 
 
 # Line editing (man zshzle)
@@ -217,8 +234,8 @@ zle -N insert-files
 zle -N predict-on
 zle -N predict-off
 #predict-on 2>/dev/null
-zle -N my-kill-line
-my-kill-line() {
+zle -N kill-line-maybe
+kill-line-maybe() {
 	if (($#BUFFER > CURSOR))
 	then	zle kill-line
 	else	zle kill-whole-line
@@ -226,83 +243,83 @@ my-kill-line() {
 }
 
 bindkey -e
-bindkey "\e[A" history-beginning-search-backward # up
-bindkey "\e[B" history-beginning-search-forward  # down
-bindkey "\e[[[cu" up-line-or-history    # Ctrl-Up
-bindkey "\e[1;5A" up-line-or-history    # Ctrl-Up
-bindkey "\e[[[cd" down-line-or-history  # Ctrl-Dn
-bindkey "\e[1;5D" down-line-or-history  # Ctrl-Dn
-bindkey "\C-aap" up-line-or-history     # Alt-Up
-bindkey "\e[1;3A" up-line-or-history    # Alt-Up
-bindkey "\e[[[au" up-line-or-history    # Alt-Up
-bindkey "\C-aan" down-line-or-history   # Alt-Dn
-bindkey "\e[1;3B" down-line-or-history  # Alt-Dn
-bindkey "\e[[[ad" down-line-or-history  # Alt-Dn
-bindkey "\e[[[su" up-line-or-history    # Shift-Up
-bindkey "\e[1;2A" up-line-or-history    # Shift-Up
-bindkey "\e[[[sd" down-line-or-history  # Shift-Dn
-bindkey "\e[1;2B" down-line-or-history  # Shift-Dn
-bindkey "\e[[[gu" beginning-of-history  # AltGr-Up
-bindkey "\e[[[gd" end-of-history        # AltGr-Dn
-bindkey "\e[5~" up-line-or-history      # PgUp
-bindkey "\e[6~" down-line-or-history    # PgDn
-bindkey "\e[D" backward-char            # left
-bindkey "\e[C" forward-char             # right
-bindkey "\e[3~" delete-char             # delete
-bindkey "\e[2~" overwrite-mode          # insert
-bindkey "\e[[[[sI" overwrite-mode       # shift-insert
-bindkey "\e[1~" beginning-of-line       # home
-bindkey "\e[H" beginning-of-line        # home in xterm without *VT100.Translate Resource
-bindkey "\e[4~" end-of-line             # end
-bindkey "\e[F" end-of-line              # end in xterm without *VT100.Translate Resource
-bindkey "\e[5;3~" beginning-of-history  # Meta-PgUp
-bindkey "\M-\e[5~" beginning-of-history # Meta-PgUp
-bindkey "\e[6;3~" end-of-history        # Meta-PgDn
-bindkey "\M-\e[6~" end-of-history       # Meta-PgDn
-bindkey "\e[40~" beginning-of-history   # Ctrl-PgUp
-bindkey "\e[5;5~" beginning-of-history  # Ctrl-PgUp
-bindkey "\e[41~" end-of-history         # Ctrl-PgDn
-bindkey "\e[6;5~" end-of-history        # Ctrl-PgDn
-bindkey "\e[[[gb" backward-kill-line    # AltGr-Backspace
-bindkey "\e[[[cb" my-kill-line          # Ctrl-Backspace
-bindkey "\e[[[sb" my-kill-line          # Shift-Backspace
-bindkey "\e[[[cD" my-kill-line          # Ctrl-Del
-bindkey "\eu" undo
-bindkey "\M-u" undo
-bindkey "\C-f" insert-files
-bindkey "\C-g" predict-off
-bindkey "\C-e" predict-on
-bindkey "\C-y" kill-whole-line
-bindkey "\C-x" kill-whole-line
-bindkey "\C-d" my-kill-line
-bindkey "\C-v" yank
-bindkey "\C-t" quoted-insert
-bindkey "\e[[[cl" backward-word         # Ctrl-Left
-bindkey "\eOD" backward-word            # Ctrl-Left
-bindkey "\e[1;5D" backward-word         # Ctrl-Left
-bindkey "\e[[[cr" forward-word          # Ctrl-Right
-bindkey "\e[1;5C" forward-word          # Ctrl-Right
-bindkey "\eOC" forward-word             # Ctrl-Right
-bindkey "\e[[[sH" clear-screen          # Shift-Home
-bindkey "\e[1;2H" forward-word          # Shift-Home
-bindkey "\e[[[sR" insert-completions    # Shift-Return
-bindkey "\e[[[cR" insert-completions    # Ctrl-Return
-bindkey "\e[[[gR" call-last-kbd-macro   # AltGr-Return
-bindkey "\C-?" backward-delete-char
-bindkey "\C-H" backward-delete-char
-bindkey "\e[21" describe-key-briefly    # F10
-bindkey "\e[21;2~" describe-key-briefly # Shift-F10
-bindkey "\e[21~" describe-key-briefly   # AltGr-F10
-bindkey "\M-#" pound-insert             # Alt-#
-bindkey "£" pound-insert                # Alt-#
-bindkey "\M\C-m" pound-insert           # Alt-Return
-bindkey "\C-Í" pound-insert             # Alt-Return
-bindkey "\e\C-m" push-input             # Esc Return
-bindkey "\e\C-i" all-matches            # Esc Tab
-bindkey "\e*"  all-matches              # Esc *
-bindkey "\e+"  all-matches              # Esc +
-bindkey "\M-+" all-matches              # Alt-+
-bindkey "\M-*" all-matches              # Alt-Shift-*
+bindkey '\e[A' history-beginning-search-backward # up
+bindkey '\e[B' history-beginning-search-forward  # down
+bindkey '\e[[[cu' up-line-or-history    # Ctrl-Up
+bindkey '\e[1;5A' up-line-or-history    # Ctrl-Up
+bindkey '\e[[[cd' down-line-or-history  # Ctrl-Dn
+bindkey '\e[1;5D' down-line-or-history  # Ctrl-Dn
+bindkey '\C-aap' up-line-or-history     # Alt-Up
+bindkey '\e[1;3A' up-line-or-history    # Alt-Up
+bindkey '\e[[[au' up-line-or-history    # Alt-Up
+bindkey '\C-aan' down-line-or-history   # Alt-Dn
+bindkey '\e[1;3B' down-line-or-history  # Alt-Dn
+bindkey '\e[[[ad' down-line-or-history  # Alt-Dn
+bindkey '\e[[[su' up-line-or-history    # Shift-Up
+bindkey '\e[1;2A' up-line-or-history    # Shift-Up
+bindkey '\e[[[sd' down-line-or-history  # Shift-Dn
+bindkey '\e[1;2B' down-line-or-history  # Shift-Dn
+bindkey '\e[[[gu' beginning-of-history  # AltGr-Up
+bindkey '\e[[[gd' end-of-history        # AltGr-Dn
+bindkey '\e[5~' up-line-or-history      # PgUp
+bindkey '\e[6~' down-line-or-history    # PgDn
+bindkey '\e[D' backward-char            # left
+bindkey '\e[C' forward-char             # right
+bindkey '\e[3~' delete-char             # delete
+bindkey '\e[2~' overwrite-mode          # insert
+bindkey '\e[[[[sI' overwrite-mode       # shift-insert
+bindkey '\e[1~' beginning-of-line       # home
+bindkey '\e[H' beginning-of-line        # home in xterm without *VT100.Translate Resource
+bindkey '\e[4~' end-of-line             # end
+bindkey '\e[F' end-of-line              # end in xterm without *VT100.Translate Resource
+bindkey '\e[5;3~' beginning-of-history  # Meta-PgUp
+bindkey '\M-\e[5~' beginning-of-history # Meta-PgUp
+bindkey '\e[6;3~' end-of-history        # Meta-PgDn
+bindkey '\M-\e[6~' end-of-history       # Meta-PgDn
+bindkey '\e[40~' beginning-of-history   # Ctrl-PgUp
+bindkey '\e[5;5~' beginning-of-history  # Ctrl-PgUp
+bindkey '\e[41~' end-of-history         # Ctrl-PgDn
+bindkey '\e[6;5~' end-of-history        # Ctrl-PgDn
+bindkey '\e[[[gb' backward-kill-line    # AltGr-Backspace
+bindkey '\e[[[cb' kill-line-maybe       # Ctrl-Backspace
+bindkey '\e[[[sb' kill-line-maybe       # Shift-Backspace
+bindkey '\e[[[cD' kill-line-maybe       # Ctrl-Del
+bindkey '\eu' undo
+bindkey '\M-u' undo
+bindkey '\C-f' insert-files
+bindkey '\C-g' predict-off
+bindkey '\C-e' predict-on
+bindkey '\C-y' kill-whole-line
+bindkey '\C-x' kill-whole-line
+bindkey '\C-d' kill-line-maybe
+bindkey '\C-v' yank
+bindkey '\C-t' quoted-insert
+bindkey '\e[[[cl' backward-word         # Ctrl-Left
+bindkey '\eOD' backward-word            # Ctrl-Left
+bindkey '\e[1;5D' backward-word         # Ctrl-Left
+bindkey '\e[[[cr' forward-word          # Ctrl-Right
+bindkey '\e[1;5C' forward-word          # Ctrl-Right
+bindkey '\eOC' forward-word             # Ctrl-Right
+bindkey '\e[[[sH' clear-screen          # Shift-Home
+bindkey '\e[1;2H' forward-word          # Shift-Home
+bindkey '\e[[[sR' insert-completions    # Shift-Return
+bindkey '\e[[[cR' insert-completions    # Ctrl-Return
+bindkey '\e[[[gR' call-last-kbd-macro   # AltGr-Return
+bindkey '\C-?' backward-delete-char
+bindkey '\C-H' backward-delete-char
+bindkey '\e[21' describe-key-briefly    # F10
+bindkey '\e[21;2~' describe-key-briefly # Shift-F10
+bindkey '\e[21~' describe-key-briefly   # AltGr-F10
+bindkey '\M-#' pound-insert             # Alt-#
+bindkey '£' pound-insert                # Alt-#
+bindkey '\M\C-m' pound-insert           # Alt-Return
+bindkey '\C-Í' pound-insert             # Alt-Return
+bindkey '\e\C-m' push-input             # Esc Return
+bindkey '\e\C-i' all-matches            # Esc Tab
+bindkey '\e*'  all-matches              # Esc *
+bindkey '\e+'  all-matches              # Esc +
+bindkey '\M-+' all-matches              # Alt-+
+bindkey '\M-*' all-matches              # Alt-Shift-*
 
 
 # Make files with certain extensions "executable" (man zshbuiltins#alias):
@@ -593,22 +610,6 @@ alias -s 3GP='$MOVIEPLAYER'
 alias -s VOB='$MOVIEPLAYER'
 
 
-# auto-fu part 1:
-# Incremental completion, see https://github.com/hchbaw/auto-fu.zsh/
-# (Only the most current versions [branch pu] work with syntax-highlighting)
-#
-# If auto-fu is not compiled it must be sourced before syntax-highlighting:
-# Activation is done after handling of syntax-highlighting:x-highlighting
-
-whence auto-fu-init NUL || [[ -r /usr/share/zsh/site-contrib/auto-fu/auto-fu ]] || {
-	if [[ -r /usr/share/zsh/site-contrib/auto-fu/auto-fu.zsh ]]
-	then	. /usr/share/zsh/site-contrib/auto-fu/auto-fu.zsh
-	elif [[ -r $DEFAULTS/zsh/auto-fu.zsh ]]
-	then	. $DEFAULTS/zsh/auto-fu.zsh
-	fi
-}
-
-
 # Activate syntax highlighting from
 # https://github.com/zsh-users/zsh-syntax-highlighting/
 #
@@ -621,16 +622,13 @@ whence auto-fu-init NUL || [[ -r /usr/share/zsh/site-contrib/auto-fu/auto-fu ]] 
 # XTerm*foreground:  white
 
 
-if [[ $#ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS -eq 0 ]] && is-at-least 4.3.9
-then	if [[ -r /usr/share/zsh/site-contrib/zsh-syntax-highlighting.zsh ]]
-	then	. /usr/share/zsh/site-contrib/zsh-syntax-highlighting.zsh
-		false
-	elif [[ -n $DEFAULTS && -r $DEFAULTS/zsh/zsh-syntax-highlighting.zsh ]]
-	then	. $DEFAULTS/zsh/zsh-syntax-highlighting.zsh
-		false
-	fi
-fi || {
-	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
+if [[ $#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] && is-at-least 4.3.9 &&
+	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
+		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
+		${path}
+	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
+	done)" NIL
+then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS+=(
 		main		# color syntax while typing (active by default)
 #		patterns	# color according to ZSH_HIGHLIGHT_PATTERNS
@@ -708,23 +706,24 @@ fi || {
 		do	ZSH_HIGHLIGHT_STYLES[bracket-level-$i]=${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES[$i]}
 		done
 	}
-}
+fi
 
 
-# auto-fu part 2:
-# If auto-fu is compiled it must be sourced after syntax-highlighting:
+# Activate incremental completion, see https://github.com/hchbaw/auto-fu.zsh/
+# (Only the most current versions [branch pu] work with syntax-highlighting)
 
-whence auto-fu-init NUL || [[ ! -r /usr/share/zsh/site-contrib/auto-fu ]] || {
-	. /usr/share/zsh/site-contrib/auto-fu/auto-fu
-	auto-fu-install
-}
-
-
-# auto-fu part 3:
-# initialize and activate auto-fu:
-
-! whence auto-fu-init NUL || {
-	zstyle ':auto-fu:highlight' input
+if whence auto-fu-init NUL || {
+	: # Status must be 0 before sourcing auto-fu.zsh
+	path=(${DEFAULTS:+${^DEFAULTS%/}/zsh{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
+		. auto-fu NIL && auto-fu-install
+	} || {
+	:
+	path=(${DEFAULTS:+${^DEFAULTS%/}/zsh{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
+		. auto-fu.zsh NIL
+	}
+then	zstyle ':auto-fu:highlight' input
 	zstyle ':auto-fu:highlight' completion fg=yellow
 	zstyle ':auto-fu:highlight' completion/one fg=green
 	zstyle ':auto-fu:var' postdisplay # $'\n-azfu-'
@@ -735,4 +734,4 @@ whence auto-fu-init NUL || [[ ! -r /usr/share/zsh/site-contrib/auto-fu ]] || {
 	zle -N zle-line-init
 	zle -N zle-keymap-select auto-fu-zle-keymap-select
 	zstyle ':completion:*' completer _complete
-}
+fi

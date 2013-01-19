@@ -5,6 +5,8 @@ Comments are welcome.
 zshrc is a zsh initialization file (e.g. to be used as /etc/zshrc or ~/.zshrc)
 which activates a lot of zsh interactive features. In particular, all of
 
+command-completion
+zsh-internal help system
 https://github.com/hchbaw/auto-fu.zsh/
 https://github.com/zsh-users/zsh-syntax-highlighting/
 https://github.com/vaeth/set_prompt/
@@ -24,14 +26,14 @@ may look differently and maybe bad). My testing xresources for xterm contain:
 	XTerm*background:  black
 	XTerm*foreground:  white
 
-Note that the zshrc file cares only about zsh specific features,
+Note that the provided zshrc file cares only about zsh specific features,
 not about "standard" variables, aliases, or functions which you would
 normally set in .profile, .bash_profile, or .bashrc:
 
 In particular, PATH etc. are expected to be complete when zshrc is sourced.
 
 Optionally, zshrc can source a separate file in which you can set things
-like aliases, functions or CDPATH for interactive usage in bash syntax.
+like PATH, CDPATH, aliases, or functions for interactive usage in bash syntax.
 (You might want to source that separate file also from .bash_profile
 or .bashrc in an interactive bash.)
 If you want to make use of that feature, you must have set
@@ -39,20 +41,35 @@ If you want to make use of that feature, you must have set
 when sourcing zshrc (or set it in the beginning of zshrc).
 
 Also some other paths are configurable if you have set
-	DEFAULTS=/path/to/local/configuration/files
+	DEFAULTS=(/paths/to/dirs/with/local/configuration/data)
+	# (as usual in zsh, this can be an array or a variable)
 when you source zshrc. More precisely, if you define DEFAULTS,
-the following files are optionally used/included (if they exist):
+the following files are taken from this location if they exist:
+
+$DEFAULTS{/zsh,}/completion/...
+	This and all its subdirectories can contain local zsh completion files
+
+$DEFAULTS{/zsh,}/help
+	This substitutes /usr/share/zsh/site-contrib/help if available.
+	The content should be generated with the Util/helpfiles script
+	as described in the zsh manpage.
 
 $DEFAULTS/DIR_COLORS{,-256}
 	These substitute /etc/DIR_COLORS{,-256} if available.
-	Download e.g. from https://github.com/vaeth/termcolors-mv/
+	Download e.g. with
+	git clone https://github.com/vaeth/termcolors-mv.git
 
-$DEFAULTS/zsh/completion/
-	Can contain local zsh completion files
+$DEFAULTS/{zsh,}{/set_prompt,}/{set_prompt.sh,git-prompt.zsh}
+	These substitute corresponding files in $PATH if available.
+	Download e.g. with
+	git clone https://github.com/vaeth/set_prompt.git
 
-$DEFAULTS/zsh/auto-fu.zsh
-	If no compiled auto-fu from https://github.com/hchbaw/auto-fu.zsh/
-	is found in a global path, this is used as a fallback.
+$DEFAULTS/zsh{/auto-fu{.zsh,},}/auto-fu{,.zsh}
+	This substitutes the corresponding file in /usr/share/zsh/site-contrib
+	if available. Download e.g. with
+	git clone https://github.com/hchbaw/auto-fu.zsh.git
 
-$DEFAULTS/zsh/zsh-syntax-highlighting.zsh
-	Fallback for https://github.com/zsh-users/zsh-syntax-highlighting/
+$DEFAULTS/zsh/{zsh-syntax-highlighting,}/zsh-syntax-highlighting.zsh
+	Thise substitutes the corresponding file in /usr/share/zsh/site-contrib
+	if available. Download e.g. with
+	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
