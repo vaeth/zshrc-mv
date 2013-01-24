@@ -87,7 +87,7 @@ autoload -Uz zmv zcalc zargs colors
 
 
 # These are needed in the following:
-autoload -Uz pick-web-browser is-at-least
+autoload -Uz pick-web-browser zsh-mime-setup is-at-least
 
 
 # Initialize the helping system:
@@ -321,293 +321,70 @@ bindkey '\e+'  all-matches              # Esc +
 bindkey '\M-+' all-matches              # Alt-+
 bindkey '\M-*' all-matches              # Alt-Shift-*
 
+# Make files with certain extensions "executable" (man zshbuiltins#alias)
+# Actually, we use zsh-mime-setup to this purpose.
 
-# Make files with certain extensions "executable" (man zshbuiltins#alias):
+# First store typical programs in variables (can be changed later)
+# A leading - sign means that also ..._flags=needsterminal is set
 
-: ${SOUNDPLAYER:=mplayer}
-: ${MOVIEPLAYER:=mplayer}
-: ${EDITOR:=e}
-: ${DVIVIEWER:=xdvi}
-: ${XFIG:=xfig}
-: ${BROWSER:=pick-web-browser}
-() {
-	local i
-	[[ -n $PDFVIEWER ]] || for i in \
-		zathura mupdf qpdfview apvlv evince okular acroread
-	do	command -v $i NIL && PDFVIEWER=$i && break
+Aa() {
+	[[ -n ${(P)1} ]] && return
+	local i j=$1 r
+	shift
+	r=$1
+	for i
+	do	whence ${i#-} NIL && r=$i && break
 	done
-	[[ -n $VIEWER ]] || for i in \
-		qiv eog
-	do	command -v $i NIL && VIEWER=$i && break
-	done
-	[[ -n $PSVIEWER ]] || for i in \
-		gv ggv
-	do	command -v $i NIL && PSVIEWER=$i && break
-	done
-	[[ -n $OFFICE ]] || for i in \
-		soffice libreoffice ooffice
-	do	command -v $i NIL && OFFICE=$i && break
+	eval $j=\${r#-}
+	[[ $r == -* ]] && eval ${j}_flags=needsterminal || unset ${j}_flags
+}
+Aa XFIG xfig
+Aa BROWSER pick-web-browser
+Aa SOUNDPLAYER -mplayer2 -mplayer
+Aa MOVIEPLAYER -mplayer2 -mplayer smplayer xine-ui kaffeine vlc false
+Aa EDITOR -e emacs -vim -vi
+Aa DVIVIEWER xdvi kdvi okular evince
+Aa PDFVIEWER zathura mupdf qpdfview apvlv okular evince acroread
+Aa VIEWER {p,}qiv feh kquickshow gwenview eog xv {gimage,gq,qpic}view viewnior
+Aa PSVIEWER {,g}gv
+Aa OFFICE {s,libre,o}office
+
+# Now we associate extensions to the above programs
+
+Aa() {
+	local i j=\$$1 k=${1}_flags
+	shift
+	for i
+	do	zstyle ":mime:.$i:*" handler $j %s
+		zstyle ":mime:.${(U)i}:*" handler $j %s
+		zstyle ":mime:.$i:*" flags ${(P)k}
+		zstyle ":mime:.${(U)i}:*" flags ${(P)k}
 	done
 }
+Aa PSVIEWER {,e}ps
+Aa DVIVIEWER dvi
+Aa XFIG {,x}fig
+Aa OFFICE doc
+Aa BROWSER htm{l,} xhtml
+Aa PDFVIEWER pdf
+Aa EDITOR txt text {read,}me 1st now {i,}nfo diz \
+	tex bib sty cls {d,l}tx ins clo fd{d,} \
+	{b,i}st el mf \
+	c{,c,pp,++} h{,pp,++} s{,rc} asm pas pyt for y \
+	diff patch \
+	py sh pl
+Aa SOUNDPLAYER au mp3 ogg flac aac mpc mid{i,} cmf cms xmi voc wav mod \
+	stm rol snd wrk mff smp al{g,2} nst med wow 669 s3m oct okt far mtm
+Aa VIEWER gif pcx bmp {p,m}ng xcf xwd cpi tga tif{f,} img pi{1,2,3,c} \
+	p{n,g,c}m {b,x}bm xpm jp{g,e,eg} iff art wpg rle
+Aa MOVIEPLAYER mp{g,eg} m2v avi flv mkv ogm mp4{,v} m4v mov qt wmv asf \
+	rm{,vb} flc fli gl dl swf 3gp vob
+unset -f Aa
 
-alias -s ps='$PSVIEWER'
-alias -s PS='$PSVIEWER'
-alias -s eps='$PSVIEWER'
-alias -s EPS='$PSVIEWER'
-alias -s dvi='$DVIVIEWER'
-alias -s DVI='$DVIVIEWER'
-alias -s fig='$XFIG'
-alias -s FIG='$XFIG'
-alias -s doc='$OFFICE'
-alias -s DOC='$OFFICE'
+# For other extensions, we use the defaults of zsh-mime-setup
 
-alias -s htm='$BROWSER'
-alias -s html='$BROWSER'
-alias -s HTM='$BROWSER'
-alias -s HTML='$BROWSER'
-
-alias -s pdf='$PDFVIEWER'
-alias -s PDF='$PDFVIEWER'
-
-alias -s txt='$EDITOR'
-alias -s me='$EDITOR'
-alias -s 1st='$EDITOR'
-alias -s now='$EDITOR'
-alias -s nfo='$EDITOR'
-alias -s diz='$EDITOR'
-alias -s TXT='$EDITOR'
-alias -s ME='$EDITOR'
-alias -s 1ST='$EDITOR'
-alias -s NOW='$EDITOR'
-alias -s NFO='$EDITOR'
-alias -s DIZ='$EDITOR'
-
-alias -s tex='$EDITOR'
-alias -s bib='$EDITOR'
-alias -s sty='$EDITOR'
-alias -s cls='$EDITOR'
-alias -s dtx='$EDITOR'
-alias -s ltx='$EDITOR'
-alias -s ins='$EDITOR'
-alias -s clo='$EDITOR'
-alias -s fdd='$EDITOR'
-alias -s fd='$EDITOR'
-alias -s TEX='$EDITOR'
-alias -s BIB='$EDITOR'
-alias -s STY='$EDITOR'
-alias -s CLS='$EDITOR'
-alias -s DTX='$EDITOR'
-alias -s LTX='$EDITOR'
-alias -s INS='$EDITOR'
-alias -s CLO='$EDITOR'
-alias -s FDD='$EDITOR'
-alias -s FD='$EDITOR'
-
-alias -s c='$EDITOR'
-alias -s cc='$EDITOR'
-alias -s cpp='$EDITOR'
-alias -s h='$EDITOR'
-alias -s hpp='$EDITOR'
-alias -s s='$EDITOR'
-alias -s src='$EDITOR'
-alias -s asm='$EDITOR'
-alias -s pas='$EDITOR'
-alias -s for='$EDITOR'
-alias -s y='$EDITOR'
-alias -s el='$EDITOR'
-alias -s bst='$EDITOR'
-alias -s ist='$EDITOR'
-alias -s mf='$EDITOR'
-alias -s PY='$EDITOR'
-alias -s PYT='$EDITOR'
-alias -s C='$EDITOR'
-alias -s CC='$EDITOR'
-alias -s CPP='$EDITOR'
-alias -s H='$EDITOR'
-alias -s HPP='$EDITOR'
-alias -s S='$EDITOR'
-alias -s SRC='$EDITOR'
-alias -s ASM='$EDITOR'
-alias -s PAS='$EDITOR'
-alias -s FOR='$EDITOR'
-alias -s Y='$EDITOR'
-alias -s EL='$EDITOR'
-alias -s BST='$EDITOR'
-alias -s IST='$EDITOR'
-alias -s MF='$EDITOR'
-
-alias -s au='$SOUNDPLAYER'
-alias -s mp3='$SOUNDPLAYER'
-alias -s ogg='$SOUNDPLAYER'
-alias -s flac='$SOUNDPLAYER'
-alias -s aac='$SOUNDPLAYER'
-alias -s mpc='$SOUNDPLAYER'
-alias -s mid='$SOUNDPLAYER'
-alias -s midi='$SOUNDPLAYER'
-alias -s cmf='$SOUNDPLAYER'
-alias -s cms='$SOUNDPLAYER'
-alias -s xmi='$SOUNDPLAYER'
-alias -s voc='$SOUNDPLAYER'
-alias -s wav='$SOUNDPLAYER'
-alias -s mod='$SOUNDPLAYER'
-alias -s stm='$SOUNDPLAYER'
-alias -s rol='$SOUNDPLAYER'
-alias -s snd='$SOUNDPLAYER'
-alias -s wrk='$SOUNDPLAYER'
-alias -s mff='$SOUNDPLAYER'
-alias -s smp='$SOUNDPLAYER'
-alias -s alg='$SOUNDPLAYER'
-alias -s al2='$SOUNDPLAYER'
-alias -s nst='$SOUNDPLAYER'
-alias -s med='$SOUNDPLAYER'
-alias -s wow='$SOUNDPLAYER'
-alias -s 669='$SOUNDPLAYER'
-alias -s s3m='$SOUNDPLAYER'
-alias -s oct='$SOUNDPLAYER'
-alias -s okt='$SOUNDPLAYER'
-alias -s far='$SOUNDPLAYER'
-alias -s mtm='$SOUNDPLAYER'
-alias -s AU='$SOUNDPLAYER'
-alias -s MP3='$SOUNDPLAYER'
-alias -s OGG='$SOUNDPLAYER'
-alias -s FLAC='$SOUNDPLAYER'
-alias -s AAC='$SOUNDPLAYER'
-alias -s MPC='$SOUNDPLAYER'
-alias -s MID='$SOUNDPLAYER'
-alias -s MIDI='$SOUNDPLAYER'
-alias -s CMF='$SOUNDPLAYER'
-alias -s CMS='$SOUNDPLAYER'
-alias -s XMI='$SOUNDPLAYER'
-alias -s VOC='$SOUNDPLAYER'
-alias -s WAV='$SOUNDPLAYER'
-alias -s MOD='$SOUNDPLAYER'
-alias -s STM='$SOUNDPLAYER'
-alias -s ROL='$SOUNDPLAYER'
-alias -s SND='$SOUNDPLAYER'
-alias -s WRK='$SOUNDPLAYER'
-alias -s MFF='$SOUNDPLAYER'
-alias -s SMP='$SOUNDPLAYER'
-alias -s ALG='$SOUNDPLAYER'
-alias -s AL2='$SOUNDPLAYER'
-alias -s NST='$SOUNDPLAYER'
-alias -s MED='$SOUNDPLAYER'
-alias -s WOW='$SOUNDPLAYER'
-alias -s 669='$SOUNDPLAYER'
-alias -s S3M='$SOUNDPLAYER'
-alias -s OCT='$SOUNDPLAYER'
-alias -s OKT='$SOUNDPLAYER'
-alias -s FAR='$SOUNDPLAYER'
-alias -s MTM='$SOUNDPLAYER'
-
-alias -s gif='$VIEWER'
-alias -s pcx='$VIEWER'
-alias -s bmp='$VIEWER'
-alias -s png='$VIEWER'
-alias -s mng='$VIEWER'
-alias -s xcf='$VIEWER'
-alias -s xwd='$VIEWER'
-alias -s cpi='$VIEWER'
-alias -s tga='$VIEWER'
-alias -s tif='$VIEWER'
-alias -s tiff='$VIEWER'
-alias -s img='$VIEWER'
-alias -s pi1='$VIEWER'
-alias -s pi2='$VIEWER'
-alias -s pi3='$VIEWER'
-alias -s pic='$VIEWER'
-alias -s pnm='$VIEWER'
-alias -s pbm='$VIEWER'
-alias -s ppm='$VIEWER'
-alias -s pgm='$VIEWER'
-alias -s pcm='$VIEWER'
-alias -s pcc='$VIEWER'
-alias -s jpg='$VIEWER'
-alias -s jpe='$VIEWER'
-alias -s jpeg='$VIEWER'
-alias -s iff='$VIEWER'
-alias -s art='$VIEWER'
-alias -s wpg='$VIEWER'
-alias -s rle='$VIEWER'
-alias -s xbm='$VIEWER'
-alias -s xpm='$VIEWER'
-alias -s GIF='$VIEWER'
-alias -s PCX='$VIEWER'
-alias -s BMP='$VIEWER'
-alias -s PNG='$VIEWER'
-alias -s MNG='$VIEWER'
-alias -s XCF='$VIEWER'
-alias -s XWD='$VIEWER'
-alias -s CPI='$VIEWER'
-alias -s TGA='$VIEWER'
-alias -s TIF='$VIEWER'
-alias -s TIFF='$VIEWER'
-alias -s IMG='$VIEWER'
-alias -s PI1='$VIEWER'
-alias -s PI2='$VIEWER'
-alias -s PI3='$VIEWER'
-alias -s PIC='$VIEWER'
-alias -s PNM='$VIEWER'
-alias -s PBM='$VIEWER'
-alias -s PPM='$VIEWER'
-alias -s PGM='$VIEWER'
-alias -s PCM='$VIEWER'
-alias -s PCC='$VIEWER'
-alias -s JPG='$VIEWER'
-alias -s JPE='$VIEWER'
-alias -s JPEG='$VIEWER'
-alias -s IFF='$VIEWER'
-alias -s ART='$VIEWER'
-alias -s WPG='$VIEWER'
-alias -s RLE='$VIEWER'
-alias -s XBM='$VIEWER'
-alias -s XPM='$VIEWER'
-
-alias -s mpg='$MOVIEPLAYER'
-alias -s mpeg='$MOVIEPLAYER'
-alias -s m2v='$MOVIEPLAYER'
-alias -s avi='$MOVIEPLAYER'
-alias -s flv='$MOVIEPLAYER'
-alias -s mkv='$MOVIEPLAYER'
-alias -s ogm='$MOVIEPLAYER'
-alias -s mp4='$MOVIEPLAYER'
-alias -s m4v='$MOVIEPLAYER'
-alias -s mp4v='$MOVIEPLAYER'
-alias -s mov='$MOVIEPLAYER'
-alias -s qt='$MOVIEPLAYER'
-alias -s wmv='$MOVIEPLAYER'
-alias -s asf='$MOVIEPLAYER'
-alias -s rm='$MOVIEPLAYER'
-alias -s rmvb='$MOVIEPLAYER'
-alias -s flc='$MOVIEPLAYER'
-alias -s fli='$MOVIEPLAYER'
-alias -s gl='$MOVIEPLAYER'
-alias -s dl='$MOVIEPLAYER'
-alias -s swf='$MOVIEPLAYER'
-alias -s 3gp='$MOVIEPLAYER'
-alias -s vob='$MOVIEPLAYER'
-alias -s MPG='$MOVIEPLAYER'
-alias -s MPEG='$MOVIEPLAYER'
-alias -s M2V='$MOVIEPLAYER'
-alias -s AVI='$MOVIEPLAYER'
-alias -s FLV='$MOVIEPLAYER'
-alias -s MKV='$MOVIEPLAYER'
-alias -s OGM='$MOVIEPLAYER'
-alias -s MP4='$MOVIEPLAYER'
-alias -s M4V='$MOVIEPLAYER'
-alias -s MP4V='$MOVIEPLAYER'
-alias -s MOV='$MOVIEPLAYER'
-alias -s QT='$MOVIEPLAYER'
-alias -s WMV='$MOVIEPLAYER'
-alias -s ASF='$MOVIEPLAYER'
-alias -s RM='$MOVIEPLAYER'
-alias -s RMVB='$MOVIEPLAYER'
-alias -s FLC='$MOVIEPLAYER'
-alias -s FLI='$MOVIEPLAYER'
-alias -s GL='$MOVIEPLAYER'
-alias -s DL='$MOVIEPLAYER'
-alias -s SWF='$MOVIEPLAYER'
-alias -s 3GP='$MOVIEPLAYER'
-alias -s VOB='$MOVIEPLAYER'
+zstyle ":mime:*" current-shell true
+zsh-mime-setup
 
 
 # Activate syntax highlighting from
