@@ -234,13 +234,15 @@ zle -N insert-files
 zle -N predict-on
 zle -N predict-off
 #predict-on 2>/dev/null
-zle -N kill-line-maybe
+
+# Let Ctrl-d successively remove tail of line, whole line, and exit
 kill-line-maybe() {
 	if (($#BUFFER > CURSOR))
 	then	zle kill-line
 	else	zle kill-whole-line
 	fi
 }
+zle -N kill-line-maybe
 
 bindkey -e
 bindkey '\e[A' history-beginning-search-backward # up
@@ -500,7 +502,14 @@ if whence auto-fu-init NUL || {
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
 		. auto-fu.zsh NIL
 	}
-then	zstyle ':auto-fu:highlight' input
+then	# Keep Ctrl-d behavior also when auto-fu is active
+	afu+orf-ignoreeof-deletechar-list() {
+	afu-eof-maybe afu-ignore-eof zle kill-line-maybe
+}
+	afu+orf-exit-deletechar-list() {
+	afu-eof-maybe exit zle kill-line-maybe
+}
+	zstyle ':auto-fu:highlight' input
 	zstyle ':auto-fu:highlight' completion fg=yellow
 	zstyle ':auto-fu:highlight' completion/one fg=green
 	zstyle ':auto-fu:var' postdisplay # $'\n-azfu-'
@@ -511,4 +520,10 @@ then	zstyle ':auto-fu:highlight' input
 	zle -N zle-line-init
 	zle -N zle-keymap-select auto-fu-zle-keymap-select
 	zstyle ':completion:*' completer _complete
+
+	# Starting a line with a space or tab or quoting the first word
+	# or escaping a word should deactivate auto-fu for that line/word.
+	# This is useful e.g. if auto-fu is too slow for you in some cases.
+	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*'
+	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
