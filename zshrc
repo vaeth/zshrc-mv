@@ -126,14 +126,24 @@ done
 
 #zstyle ':completion:*' file-list true # if used, list-colors is ignored
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) #([0-9a-z/-]# #[0-9:]# #)*=01;32=01;36=01;33'
+zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]#) #([0-9a-z/-]# #[0-9:]# #)*=01;32=01;36=01;33'
+zstyle ':completion:*:*:*:*:hosts' list-colors '=*=00;36'
+zstyle ':completion:*:*:*:*:users' list-colors '=*=01;35'
+zstyle ':completion:*:*:*:*:modules' list-colors '=*=01;35'
+zstyle ':completion:*:*:*:*:interfaces' list-colors '=*=01;35'
+zstyle ':completion:*:*:*:*:packages' list-colors '=*=01;32'
+zstyle ':completion:*:*:*:*:categories' list-colors '=*=00;32'
+zstyle ':completion:*:*:*:*:useflags' list-colors '=*=01;35'
+zstyle ':completion:*:reserved-words' list-colors '=*=01;32'
+zstyle ':completion:*:aliases' list-colors '=*=01;32'
+zstyle ':completion:*:parameters' list-colors '=*=01;36'
 zstyle ':completion:*' completer _complete _expand _expand_alias
 zstyle ':completion:*' menu select=1 # interactive
 zstyle ':completion:*' original true
 zstyle ':completion:*' remote-access false
 zstyle ':completion:*' use-perl true
 zstyle ':completion:*' verbose true
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
 zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
