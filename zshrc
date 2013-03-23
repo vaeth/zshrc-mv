@@ -15,13 +15,13 @@ export SHELL=/bin/zsh
 () {
 	emulate -L sh
 	setopt kshglob noshglob braceexpand nonomatch
-	[[ -f $interactive ]] && . "${interactive}"
+	[[ -f $interactive ]] && . "$interactive"
 }
 
 # Some pipe aliases which cannot be defined for bash:
 
 alias -g 'CAT'='|& cat -A'
-alias -g 'TAIL'='|& tail -n $(( ${LINES} - 3 ))'
+alias -g 'TAIL'='|& tail -n $(( $LINES - 3 ))'
 alias -g 'LESS'='|& less -Rs'
 alias -g 'NUL'='>/dev/null'
 alias -g 'NULL'='NUL'
@@ -30,7 +30,7 @@ alias -g 'NIL'='>&/dev/null'
 
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
-case ${TERM} in
+case $TERM in
 (xterm|screen|tmux|rxvt)
 	TERM="${TERM}-256color";;
 esac
@@ -106,19 +106,22 @@ done
 # Define LS_COLORS if not already done in $interactive
 # (this must be done before setting the completion system colors).
 # I recommend https://github.com/vaeth/termcolors-mv/
+# but a fallback is used if the corresponding script is not in path.
 
-[[ -n $LS_COLORS ]] || () {
-	local -a files
-	files=(
-		${DEFAULTS:+${^DEFAULTS%/}/DIR_COLORS}
-		"${HOME}/.dir_colors"
-		'/etc/DIR_COLORS'
-	)
-	[[ $(echotc Co) -ge 256 ]] && files=(${^files[@]}'-256' $files)
-	local i
-	for i in $files
-	do	[[ -r $i ]] && eval "$(dircolors -- $i)" && break
-	done
+[[ -n $LS_COLORS ]] || {
+	if whence dircolors-mv NUL
+	then	eval "$(SOLARIZED=$SOLARIZED dircolors-mv)"
+	elif whence dircolor NUL
+	then	() {
+		local i
+		for i in \
+			${DEFAULTS:+{^DEFAULTS%/}/DIR_COLORS} \
+			"${HOME}/.dircolors" \
+			'/etc/DIR_COLORS'
+		do	[[ -f $i ]] && eval "$(dircolors -- "${i}")" && break
+		done
+	}
+	fi
 }
 
 
@@ -148,7 +151,7 @@ zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
 if is-at-least 4.3.10
-then	zstyle ':completion:*' format '%B%F{yellow}%K{blue}%d%k%f%b'
+then	zstyle ':completion:*' format '%B%F{black}%K{blue}%d%k%f%b'
 else	zstyle ':completion:*' format '%B%d%b'
 fi
 
@@ -173,7 +176,7 @@ whence compinit NUL || {
 }
 
 # Results from CDPATH usually produce confusing completions of cd:
-_my_cd() CDPATH= _cd "${@}"
+_my_cd() CDPATH= _cd "$@"
 compdef _my_cd cd
 
 # mtools completion can hang, so we eliminate it:
@@ -187,6 +190,7 @@ whence ssh NUL && {
 	compdef knock=ssh
 	compdef knock.ssh=knock
 	compdef knock.mosh=knock
+	compdef knock.zssh=knock
 }
 whence sudox NUL && {
 	compdef ssudox=sudox
@@ -414,7 +418,7 @@ zsh-mime-setup
 if [[ $#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] && is-at-least 4.3.9 &&
 	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
-		${path}
+		$path
 	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
 	done)" NIL
 then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
@@ -459,6 +463,24 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'assign'			fg=159,bold
 			'bracket-error'			fg=196,bold
 		)
+		if [[ ${SOLARIZED:-n} != [nNfF0]* ]]
+		then	ZSH_HIGHLIGHT_STYLES+=(
+			'default'			none,
+			'unknown-token'			fg=red,bold
+			'reserved-word'			fg=white
+			'alias'				fg=cyan,bold
+			'builtin'			fg=yellow,bold
+			'function'			fg=blue,bold
+			'command'			fg=green
+			'hashed-command'		fg=green
+			'path'				fg=yellow
+			'globbing'			fg=magenta
+			'single-hyphen-option'		fg=green,bold
+			'double-hyphen-option'		fg=magenta,bold
+			'assign'			fg=cyan
+			'bracket-error'			fg=red
+		)
+		fi
 	else	ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES=(
 			fg=cyan
 			fg=magenta

@@ -18,13 +18,19 @@ are initialized if available.
 For gentoo, ebuilds for this and all above packages can be found
 in the mv overlay (available via layman).
 
-Concerning the colors which zshrc sets, you will only be happy if you
-use a terminal with a black background (and the 256 colors are mainly
-tested with xterm - with other terminals e.g. the highlighted colors
-may look differently and maybe bad). My testing xresources for xterm contain:
+Concerning the colors which zshrc sets, only the following cases are tested
+(and probably things will look ugly in other cases):
+1. You use a terminal with a black background (and the 256 colors are mainly
+   tested with xterm - with other terminals e.g. the highlighted colors
+   may look differently and maybe bad). My testing xresources for xterm contain:
 	XTerm*cursorColor: green
 	XTerm*background:  black
 	XTerm*foreground:  white
+2. The terminal is specially configured to use
+   Ethan Schoonover's solarized colorscheme.
+   Both, light and dark schemes of solarized are tested.
+   You have to tell zshrc that you want solarized by setting
+   SOLARIZED="true" (or "light" or "dark").
 
 Note that the provided zshrc file cares only about zsh specific features,
 not about "standard" variables, aliases, or functions which you would
@@ -54,22 +60,35 @@ $DEFAULTS{/zsh,}/help
 	The content should be generated with the Util/helpfiles script
 	as described in the zsh manpage.
 
-$DEFAULTS/DIR_COLORS{,-256}
-	These substitute /etc/DIR_COLORS{,-256} if available.
+$DEFAULTS/DIR_COLORS
+$DEFAULTS/dir_colors/*
+	By default, zshrc uses dircolors-mv (from termcolors-mv.git) to
+	replace /etc/DIR_COLORS by a directory /etc/dir_colors/*
+	of colorschemes which selects the appropriate scheme by taking
+	the environment variable $TERM and $SOLARIZED into account.
+	The dircolors-mv script also honours $DEFAULTS, but only if it
+	is an (exported) environment variables (and not an array).
 	Download e.g. with
 	git clone https://github.com/vaeth/termcolors-mv.git
+	or (as a gentoo user) install from the mv overlay.
+	If dircolors-mv is not in $PATH, zshrc uses as a fallback the first
+	existing of $DEFAULTS/DIR_COLORS, ~/.dircolors, or /etc/DIRCOLORS
+	(ignoring the values of $SOLARIZED and $TERM in this case).
 
 $DEFAULTS/{zsh,}{/set_prompt,}/{set_prompt.sh,git-prompt.zsh}
 	These substitute corresponding files in $PATH if available.
 	Download e.g. with
 	git clone https://github.com/vaeth/set_prompt.git
+	or (as a gentoo user) install from the mv overlay.
 
 $DEFAULTS/zsh{/auto-fu{.zsh,},}/auto-fu{,.zsh}
 	This substitutes the corresponding file in /usr/share/zsh/site-contrib
 	if available. Download e.g. with
 	git clone https://github.com/hchbaw/auto-fu.zsh.git
+	or (as a gentoo user) install from the mv overlay.
 
 $DEFAULTS/zsh/{zsh-syntax-highlighting,}/zsh-syntax-highlighting.zsh
 	Thise substitutes the corresponding file in /usr/share/zsh/site-contrib
 	if available. Download e.g. with
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
+	or (as a gentoo user) install from the mv overlay.
