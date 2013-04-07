@@ -151,8 +151,8 @@ zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
 if is-at-least 4.3.10
-then	zstyle ':completion:*' format '%B%F{black}%K{blue}%d%k%f%b'
-else	zstyle ':completion:*' format '%B%d%b'
+then	zstyle ':completion:*' format '%b%F{yellow}%d:%f'
+else	zstyle ':completion:*' format '%B%d:%b'
 fi
 
 # Make all-matches a widget which inserts all previous matches:
@@ -182,40 +182,18 @@ compdef _my_cd cd
 # mtools completion can hang, so we eliminate it:
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
-# Some aliases or wrapper scripts behave like other commands:
-
-compdef mcd=cd
+# Some private shell functions or wrapper scripts behave like other commands:
+compdef mcd=mkdir
 whence gpg NUL && compdef gpg.wrapper=gpg
-whence ssh NUL && {
-	compdef knock=ssh
-	compdef knock.ssh=knock
-	compdef knock.mosh=knock
-	compdef knock.zssh=knock
+whence sudox NUL && compdef ssudox=sudox
+whence eix NUL && () {
+	local i
+	for i in eix{,-diff,-update,-sync,-test-obsolete}
+	do	compdef ${i}.{32,64}=$i
+	done
 }
-whence sudox NUL && {
-	compdef ssudox=sudox
-	compdef su=sudox
-}
-whence eix NUL && {
-	compdef eix.32=eix
-	compdef eix.64=eix
-	compdef eix-diff.32=eix-diff
-	compdef eix-diff.64=eix-diff
-	compdef eix-update.32=eix-update
-	compdef eix-update.64=eix-update
-	compdef eix-sync.32=eix-sync
-	compdef eix-sync.64=eix-sync
-	compdef eix-test-obsolete.32=eix-test-obsolete
-	compdef eix-test-obsolete.64=eix-test-obsolete
-}
-whence emerge NUL && {
-	compdef emerge.wrapper=emerge
-	compdef emerge.noprotect=emerge
-}
-whence useflags NUL && {
-	compdef useflags.32=useflags
-	compdef useflags.64=useflags
-}
+whence emerge NUL && compdef emerge.{wrapper,noprotect}=emerge
+whence useflags NUL && compdef useflags.{32,64}=useflags
 
 # Line editing during completion (man zshmodules: zsh/complist)
 
