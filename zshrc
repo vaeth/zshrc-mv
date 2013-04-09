@@ -151,8 +151,8 @@ zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
 if is-at-least 4.3.10
-then	zstyle ':completion:*' format '%b%F{yellow}%d:%f'
-else	zstyle ':completion:*' format '%B%d:%b'
+then	zstyle ':completion:*' format '%b%F{yellow}(%d)%f'
+else	zstyle ':completion:*' format '%B(%d)%b'
 fi
 
 # Make all-matches a widget which inserts all previous matches:
