@@ -183,7 +183,7 @@ compdef _my_cd cd
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
 # Some private shell functions or wrapper scripts behave like other commands:
-compdef mcd=mkdir
+compdef mcd=cd
 whence gpg NUL && compdef gpg.wrapper=gpg
 whence sudox NUL && compdef ssudox=sudox
 whence eix NUL && () {
