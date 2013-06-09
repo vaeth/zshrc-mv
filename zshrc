@@ -141,6 +141,7 @@ zstyle ':completion:*:reserved-words' list-colors '=*=01;32'
 zstyle ':completion:*:aliases' list-colors '=*=01;32'
 zstyle ':completion:*:parameters' list-colors '=*=01;36'
 zstyle ':completion:*' completer _complete _expand _expand_alias
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' menu select=1 # interactive
 zstyle ':completion:*' original true
 zstyle ':completion:*' remote-access false
