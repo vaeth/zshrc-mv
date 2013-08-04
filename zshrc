@@ -535,6 +535,7 @@ then	# Keep Ctrl-d behavior also when auto-fu is active
 	# Starting a line with a space or tab or quoting the first word
 	# or escaping a word should deactivate auto-fu for that line/word.
 	# This is useful e.g. if auto-fu is too slow for you in some cases.
-	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*'
+	# Unfortunately, for eix auto-fu is always too slow...
+	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*|eix(|32|64)[[:blank:]]*'
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
