@@ -406,7 +406,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 #		patterns	# color according to ZSH_HIGHLIGHT_PATTERNS
 		brackets	# color matching () {} [] pairs
 #		cursor		# color cursor; useless with cursorColor
-#		root		# color if you are root; seems broken
+#		root		# color if you are root; broken in some versions
 	)
 	typeset -gUa ZSH_ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS
 	ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS+=(sudo fakeroot fakeroot-ng)
@@ -428,8 +428,11 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'builtin'			fg=47,bold
 			'function'			fg=76,bold
 			'command'			fg=40,bold
+			'precommand'			fg=40,bold
 			'hashed-command'		fg=40,bold
 			'path'				fg=214,bold
+			'path_prefix'			fg=214,bold
+			'path_approx'			none
 			'globbing'			fg=190,bold
 			'history-expansion'		fg=166,bold
 			'single-hyphen-option'		fg=33,bold
@@ -444,15 +447,18 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 		)
 		if [[ ${SOLARIZED:-n} != [nNfF0]* ]]
 		then	ZSH_HIGHLIGHT_STYLES+=(
-			'default'			none,
+			'default'			none
 			'unknown-token'			fg=red,bold
 			'reserved-word'			fg=white
 			'alias'				fg=cyan,bold
 			'builtin'			fg=yellow,bold
 			'function'			fg=blue,bold
 			'command'			fg=green
+			'precommand'			fg=green
 			'hashed-command'		fg=green
 			'path'				fg=yellow
+			'path_prefix'			fg=yellow
+			'path_approx'			none
 			'globbing'			fg=magenta
 			'single-hyphen-option'		fg=green,bold
 			'double-hyphen-option'		fg=magenta,bold
@@ -475,8 +481,11 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'builtin'			fg=green,bold
 			'function'			fg=green,bold
 			'command'			fg=yellow,bold
+			'precommand'			fg=yellow,bold
 			'hashed-command'		fg=yellow,bold
 			'path'				fg=white,bold
+			'path_prefix'			fg=white,bold
+			'path_approx'			none
 			'globbing'			fg=magenta,bold
 			'history-expansion'		fg=yellow,bold,bg=red
 			'single-hyphen-option'		fg=cyan,bold
