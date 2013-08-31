@@ -27,7 +27,6 @@ alias -g 'NUL'='>/dev/null'
 alias -g 'NULL'='NUL'
 alias -g 'NIL'='>&/dev/null'
 
-
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
 case $TERM in
@@ -187,14 +186,21 @@ compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mm
 compdef mcd=cd
 whence gpg NUL && compdef gpg.wrapper=gpg
 whence sudox NUL && compdef ssudox=sudox
-whence eix NUL && () {
-	local i
-	for i in eix{,-diff,-update,-sync,-test-obsolete}
-	do	compdef ${i}.{32,64}=$i
+() {
+	local i j
+	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
+	do	for j in ${i}.{32,64}
+		do	whence $j NUL && compdef $j=$i && alias $j="noglob $j"
+		done
+		whence $i NUL && alias $i="noglob $i"
+	done
+	for i in emerge.{wrapper,noprotect}
+	do	whence $i NUL && compdef $i=emerge && alias $i="noglob $i"
+	done
+	for i in emerge squashmount squash_dir
+	do	whence $i NUL && alias $i="noglob $i"
 	done
 }
-whence emerge NUL && compdef emerge.{wrapper,noprotect}=emerge
-whence useflags NUL && compdef useflags.{32,64}=useflags
 
 # Line editing during completion (man zshmodules: zsh/complist)
 
