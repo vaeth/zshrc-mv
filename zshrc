@@ -91,12 +91,15 @@ autoload -Uz pick-web-browser zsh-mime-setup is-at-least
 
 # Initialize the helping system:
 
-for HELPDIR in ${DEFAULTS:+{^DEFAULTS%/}{/zsh,}/help} \
+for HELPDIR in '' \
+	${DEFAULTS:+{^DEFAULTS%/}{/zsh,}/help} \
+	${EPREFIX:+${EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
 	'/usr/share/zsh/site-contrib/help'
-do	[[ -d $HELPDIR ]] && {
+do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
 		alias help=run-help
+		[[ -n ${HELPDIR} ]] || unset HELPDIR
 		break
 	}
 done
