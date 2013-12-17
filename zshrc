@@ -205,6 +205,11 @@ whence sudox NUL && compdef ssudox=sudox
 	done
 }
 
+# Poor man's substitute for missing completions:
+
+compdef mplayer2=mplayer
+
+
 # Line editing during completion (man zshmodules: zsh/complist)
 
 zmodload zsh/complist
