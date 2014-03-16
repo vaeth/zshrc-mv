@@ -354,6 +354,10 @@ Aa MOVIEPLAYER -mplayer2 -mplayer smplayer xine-ui kaffeine vlc false
 Aa EDITOR -e emacs -vim -vi
 Aa DVIVIEWER xdvi kdvi okular evince
 Aa PDFVIEWER zathura mupdf qpdfview apvlv okular evince acroread
+Aa DJVREADER djview djview4 okular evince
+Aa EPUBREADER fbreader calibre firefox
+Aa MOBIREADER fbreader calibre
+Aa LITREADER calibre
 Aa VIEWER {p,}qiv feh kquickshow gwenview eog xv {gimage,gq,qpic}view viewnior
 Aa PSVIEWER {,g}gv
 Aa OFFICE {s,libre,o}office
@@ -376,12 +380,15 @@ Aa XFIG {,x}fig
 Aa OFFICE doc
 Aa BROWSER htm{l,} xhtml
 Aa PDFVIEWER pdf
+Aa DJVREADER djv{u,}
+Aa EPUBREADER epub
+Aa MOBIREADER mobi
+Aa LITREADER lit
 Aa EDITOR txt text {read,}me 1st now {i,}nfo diz \
 	tex bib sty cls {d,l}tx ins clo fd{d,} \
 	{b,i}st el mf \
 	c{,c,pp,++} h{,pp,++} s{,rc} asm pas pyt for y \
-	diff patch \
-	py sh pl
+	diff patch
 Aa SOUNDPLAYER au mp3 ogg flac aac mpc mid{i,} cmf cms xmi voc wav mod \
 	stm rol snd wrk mff smp al{g,2} nst med wow 669 s3m oct okt far mtm
 Aa VIEWER gif pcx bmp {p,m}ng xcf xwd cpi tga tif{f,} img pi{1,2,3,c} \
