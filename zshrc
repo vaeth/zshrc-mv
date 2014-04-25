@@ -14,7 +14,7 @@ export SHELL=/bin/zsh
 # source $interactive in bash compatibility mode:
 () {
 	emulate -L sh
-	setopt kshglob noshglob braceexpand nonomatch
+	setopt ksh_glob no_sh_glob brace_expand no_nomatch
 	[[ -f $interactive ]] && . "$interactive"
 }
 
@@ -37,15 +37,15 @@ esac
 
 # Options (man zshoptions):
 
-setopt noautocd autopushd cdablevars nochasedots nochaselinks
-setopt pathdirs autonamedirs bashautolist promptsubst nobeep nolistambiguous
-setopt listpacked
-setopt histignorealldups histreduceblanks histverify nohistexpand
-setopt extendedglob histsubstpattern
-setopt nodotglob nonomatch nonullglob numericglobsort noshglob
-setopt mailwarning interactivecomments noclobber
-setopt nobgnice nocheckjobs nohup longlistjobs monitor notify
-#setopt printexitvalue
+setopt no_auto_cd auto_pushd cdable_vars no_chase_dots no_chase_links
+setopt path_dirs auto_name_dirs bash_auto_list prompt_subst no_beep
+setopt no_list_ambiguous list_packed
+setopt hist_ignore_all_dups hist_reduce_blanks hist_verify no_hist_expand
+setopt extended_glob hist_subst_pattern
+setopt no_glob_dots no_nomatch no_null_glob numeric_glob_sort no_sh_glob
+setopt mail_warning interactive_comments no_clobber
+setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
+#setopt print_exit_value
 
 NULLCMD=:
 READNULLCMD=less
@@ -67,6 +67,7 @@ DIRSTACKSIZE=100
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
+setopt no_warn_create_global
 () {
 	local i
 	i=$(whence -w set_prompt) && {
@@ -78,6 +79,7 @@ DIRSTACKSIZE=100
 	set_prompt -r
 	path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}} $path) . git_prompt.zsh
 }
+setopt warn_create_global
 
 
 # I want zmv and other nice features (man zshcontrib)
@@ -169,7 +171,7 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 # Initialize the completion system
 whence compinit NUL || {
 	[[ -n $DEFAULTS ]] && () {
-		setopt localoptions nullglob
+		setopt local_options null_glob
 		local -a d
 		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(/))
 		fpath=(${d%/} $fpath)
@@ -344,8 +346,9 @@ Aa() {
 	for i
 	do	whence ${i#-} NIL && r=$i && break
 	done
-	eval $j=\${r#-}
-	[[ $r == -* ]] && eval ${j}_flags=needsterminal || unset ${j}_flags
+	typeset -g $j="${r#-}"
+	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal \
+		|| unset ${j}_flags
 }
 Aa XFIG xfig
 Aa BROWSER pick-web-browser
@@ -543,7 +546,9 @@ if whence auto-fu-init NUL || {
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
 		. auto-fu.zsh NIL
 	}
-then	# Keep Ctrl-d behavior also when auto-fu is active
+then	# auto-fu.zsh gives confusing messages with warn_create_global:
+	setopt no_warn_create_global
+	# Keep Ctrl-d behavior also when auto-fu is active
 	afu+orf-ignoreeof-deletechar-list() {
 	afu-eof-maybe afu-ignore-eof zle kill-line-maybe
 }
