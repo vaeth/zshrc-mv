@@ -37,7 +37,7 @@ esac
 
 # Options (man zshoptions):
 
-setopt no_auto_cd auto_pushd cdable_vars no_chase_dots no_chase_links
+setopt no_auto_cd auto_pushd no_cdable_vars no_chase_dots no_chase_links
 setopt path_dirs auto_name_dirs bash_auto_list prompt_subst no_beep
 setopt no_list_ambiguous list_packed
 setopt hist_ignore_all_dups hist_reduce_blanks hist_verify no_hist_expand
@@ -211,29 +211,52 @@ whence sudox NUL && compdef ssudox=sudox
 
 compdef mplayer2=mplayer
 
+# Wrapper function for bindkey: multiple keys, '$...' refers to terminfo;
+# - means -M menuselect
+
+Aa() {
+	local b c
+	local -a a
+	if [[ $1 == - ]]
+	then	a=(-M menuselect)
+		shift
+	else	a=()
+	fi
+	b=$1
+	shift
+	while [[ ${#} -gt 0 ]]
+	do	case ${1} in
+		'$'*)
+			c=${terminfo[${1#?}]};;
+		*)
+			c=$1;;
+		esac
+		[[ -z $c ]] || bindkey $a $c $b
+		shift
+	done
+}
 
 # Line editing during completion (man zshmodules: zsh/complist)
 
 zmodload zsh/complist
-bindkey -M menuselect '\C-M' accept-and-infer-next-history # Return
-bindkey -M menuselect '\M-\C-m' accept-and-hold            # Alt-Return
-bindkey -M menuselect '\C-Í' accept-and-hold               # Alt-Return
-bindkey -M menuselect '\e[[[sR' accept-and-hold            # Shift-Return
-bindkey -M menuselect '\e\C-m' accept-and-hold             # Esc-Return
-bindkey -M menuselect '\e- ' accept-and-hold               # Esc Space
-bindkey -M menuselect '\M- ' accept-and-hold               # Alt Space
-bindkey -M menuselect '\C- ' accept-and-hold               # Ctrl-Space
-bindkey -M menuselect '\C-+' accept-and-hold               # Ctrl-+
-bindkey -M menuselect '\C-?' undo                          # Backspace
-bindkey -M menuselect '\C-.' undo                          # Ctrl-.
-bindkey -M menuselect '\M-.' undo                          # Alt-.
-bindkey -M menuselect '\e' send-break                      # Esc
-bindkey -M menuselect '\C-c' send-break                    # Ctrl-C
-bindkey -M menuselect '\e[5~' backward-word                # PgUp
-bindkey -M menuselect '\e[6~' forward-word                 # PgDn
-bindkey -M menuselect '\C-l' history-incremental-search-forward # Ctrl-L
-bindkey -M menuselect '\e[2~' vi-insert                    # insert
-bindkey -M menuselect '\e[[[[sI' vi-insert                 # shift-insert
+Aa - accept-and-infer-next-history '\C-M'      # Return
+Aa - accept-and-hold '\M-\C-m' '\C-Í'          # Alt-Return
+Aa - accept-and-hold '\e[[[sR '                # Shift-Return
+Aa - accept-and-hold '\e\C-m'                  # Esc Return
+Aa - accept-and-hold '\e- '                    # Esc Space
+Aa - accept-and-hold '\M- '                    # Alt-Space
+Aa - accept-and-hold '\C- '                    # Ctrl-Space
+Aa - accept-and-hold '\C-+'                    # Ctrl-+
+Aa - undo '\C-?' '\C-H' '$kbs'                 # Backspace
+Aa - undo '\C-.'                               # Ctrl-.
+Aa - undo '\M-.'                               # Alt-.
+Aa - send-break '\e'                           # Esc
+Aa - send-break '\C-c'                         # Ctrl-C
+Aa - backward-word '\e[5~' '$kpp'              # PgUp
+Aa - forward-word  '\e[6~' '$knp'              # PgDn
+Aa - history-incremental-search-forward '\C-l' # Ctrl-L
+Aa - vi-insert '\e[2~'                         # Insert
+Aa - vi-insert '\e[[[[sI'                      # Shift-Insert
 
 
 # Line editing (man zshzle)
@@ -254,83 +277,61 @@ kill-line-maybe() {
 zle -N kill-line-maybe
 
 bindkey -e
-bindkey '\e[A' history-beginning-search-backward # up
-bindkey '\e[B' history-beginning-search-forward  # down
-bindkey '\e[[[cu' up-line-or-history    # Ctrl-Up
-bindkey '\e[1;5A' up-line-or-history    # Ctrl-Up
-bindkey '\e[[[cd' down-line-or-history  # Ctrl-Dn
-bindkey '\e[1;5D' down-line-or-history  # Ctrl-Dn
-bindkey '\C-aap' up-line-or-history     # Alt-Up
-bindkey '\e[1;3A' up-line-or-history    # Alt-Up
-bindkey '\e[[[au' up-line-or-history    # Alt-Up
-bindkey '\C-aan' down-line-or-history   # Alt-Dn
-bindkey '\e[1;3B' down-line-or-history  # Alt-Dn
-bindkey '\e[[[ad' down-line-or-history  # Alt-Dn
-bindkey '\e[[[su' up-line-or-history    # Shift-Up
-bindkey '\e[1;2A' up-line-or-history    # Shift-Up
-bindkey '\e[[[sd' down-line-or-history  # Shift-Dn
-bindkey '\e[1;2B' down-line-or-history  # Shift-Dn
-bindkey '\e[[[gu' beginning-of-history  # AltGr-Up
-bindkey '\e[[[gd' end-of-history        # AltGr-Dn
-bindkey '\e[5~' up-line-or-history      # PgUp
-bindkey '\e[6~' down-line-or-history    # PgDn
-bindkey '\e[D' backward-char            # left
-bindkey '\e[C' forward-char             # right
-bindkey '\e[3~' delete-char             # delete
-bindkey '\e[2~' overwrite-mode          # insert
-bindkey '\e[[[[sI' overwrite-mode       # shift-insert
-bindkey '\e[1~' beginning-of-line       # home
-bindkey '\e[H' beginning-of-line        # home in xterm without *VT100.Translate Resource
-bindkey '\e[4~' end-of-line             # end
-bindkey '\e[F' end-of-line              # end in xterm without *VT100.Translate Resource
-bindkey '\e[5;3~' beginning-of-history  # Meta-PgUp
-bindkey '\M-\e[5~' beginning-of-history # Meta-PgUp
-bindkey '\e[6;3~' end-of-history        # Meta-PgDn
-bindkey '\M-\e[6~' end-of-history       # Meta-PgDn
-bindkey '\e[40~' beginning-of-history   # Ctrl-PgUp
-bindkey '\e[5;5~' beginning-of-history  # Ctrl-PgUp
-bindkey '\e[41~' end-of-history         # Ctrl-PgDn
-bindkey '\e[6;5~' end-of-history        # Ctrl-PgDn
-bindkey '\e[[[gb' backward-kill-line    # AltGr-Backspace
-bindkey '\e[[[cb' kill-line-maybe       # Ctrl-Backspace
-bindkey '\e[[[sb' kill-line-maybe       # Shift-Backspace
-bindkey '\e[[[cD' kill-line-maybe       # Ctrl-Del
-bindkey '\eu' undo
-bindkey '\M-u' undo
-bindkey '\C-f' insert-files
-bindkey '\C-g' predict-off
-bindkey '\C-e' predict-on
-bindkey '\C-y' kill-whole-line
-bindkey '\C-x' kill-whole-line
-bindkey '\C-d' kill-line-maybe
-bindkey '\C-v' yank
-bindkey '\C-t' quoted-insert
-bindkey '\e[[[cl' backward-word         # Ctrl-Left
-bindkey '\eOD' backward-word            # Ctrl-Left
-bindkey '\e[1;5D' backward-word         # Ctrl-Left
-bindkey '\e[[[cr' forward-word          # Ctrl-Right
-bindkey '\e[1;5C' forward-word          # Ctrl-Right
-bindkey '\eOC' forward-word             # Ctrl-Right
-bindkey '\e[[[sH' clear-screen          # Shift-Home
-bindkey '\e[1;2H' forward-word          # Shift-Home
-bindkey '\e[[[sR' insert-completions    # Shift-Return
-bindkey '\e[[[cR' insert-completions    # Ctrl-Return
-bindkey '\e[[[gR' call-last-kbd-macro   # AltGr-Return
-bindkey '\C-?' backward-delete-char
-bindkey '\C-H' backward-delete-char
-bindkey '\e[21' describe-key-briefly    # F10
-bindkey '\e[21;2~' describe-key-briefly # Shift-F10
-bindkey '\e[21~' describe-key-briefly   # AltGr-F10
-bindkey '\M-#' pound-insert             # Alt-#
-bindkey '£' pound-insert                # Alt-#
-bindkey '\M\C-m' pound-insert           # Alt-Return
-bindkey '\C-Í' pound-insert             # Alt-Return
-bindkey '\e\C-m' push-input             # Esc Return
-bindkey '\e\C-i' all-matches            # Esc Tab
-bindkey '\e*'  all-matches              # Esc *
-bindkey '\e+'  all-matches              # Esc +
-bindkey '\M-+' all-matches              # Alt-+
-bindkey '\M-*' all-matches              # Alt-Shift-*
+Aa history-beginning-search-backward '\e[A' '$kcuu1' # Up
+Aa history-beginning-search-forward  '\e[B' '$kcud1' # Down
+Aa up-line-or-history '\e[[[cu' '\e[1;5A'            # Ctrl-Up
+Aa down-line-or-history '\e[[[cd' '\e[1;5D'          # Ctrl-Dn
+Aa up-line-or-history '\C-aap' '\e[1;3A' '\e[[[au'   # Alt-Up
+Aa down-line-or-history '\C-aan' '\e[1;3B' '\e[[[ad' # Alt-Dn
+Aa up-line-or-history '\e[[[su' '\e[1;2A'            # Shift-Up
+Aa down-line-or-history '\e[[[sd' '\e[1;2B'          # Shift-Dn
+Aa beginning-of-history '\e[[[gu'                    # AltGr-Up
+Aa end-of-history '\e[[[gd'                          # AltGr-Dn
+Aa up-line-or-history '\e[5~' '$kpp'                 # PgUp
+Aa down-line-or-history '\e[6~' '$knp'               # PgDn
+Aa beginning-of-history '\e[5;3~' '\M-\e[5~'         # Meta-PgUp
+Aa end-of-history '\e[6;3~' '\M-\e[6~'               # Meta-PgDn
+Aa beginning-of-history '\e[40~' '\e[5;5~'           # Ctrl-PgUp
+Aa end-of-history '\e[41~' '\e[6;5~'                 # Ctrl-PgDn
+Aa backward-char '\e[D' '$kcub1'                     # Left
+Aa forward-char '\e[C' '$kcuf1'                      # Right
+Aa backward-word '\e[[[cl' '\eOD' '\e[1;5D'          # Ctrl-Left
+Aa forward-word '\e[[[cr' '\e[1;5C' '\eOC'           # Ctrl-Right
+Aa delete-char '\e[3~' '$kdch1'                      # Delete
+Aa kill-line-maybe '\e[[[cD'                         # Ctrl-Delete
+Aa overwrite-mode '\e[2~' '$kich1'                   # Insert
+Aa overwrite-mode '\e[[[[sI'                         # Shift-Insert
+Aa beginning-of-line '\e[1~' '\e[H' '$khome'         # Home
+Aa end-of-line '\e[4~' '\e[F' '$kend'                # End
+Aa clear-screen '\e[[[sH' '\e[1;2H'                  # Shift-Home
+Aa backward-delete-char '\C-?' '\C-H' '$kbs'         # Backspace
+Aa backward-kill-line '\e[[[gb'                      # AltGr-Backspace
+Aa kill-line-maybe '\e[[[cb'                         # Ctrl-Backspace
+Aa kill-line-maybe '\e[[[sb'                         # Shift-Backspace
+Aa insert-completions '\e[[[sR'                      # Shift-Return
+Aa insert-completions '\e[[[cR'                      # Ctrl-Return
+Aa call-last-kbd-macro '\e[[[gR'                     # AltGr-Return
+Aa pound-insert '\M\C-m' '\C-Í'                      # Alt-Return
+Aa push-input '\e\C-m'                               # Esc Return
+Aa describe-key-briefly '\e[21'                      # F10
+Aa describe-key-briefly '\e[21;2~'                   # Shift-F10
+Aa describe-key-briefly '\e[21~'                     # AltGr-F10
+Aa pound-insert '\M-#' '£'                           # Alt-#
+Aa all-matches '\e\C-i'                              # Esc Tab
+Aa all-matches '\e*'                                 # Esc *
+Aa all-matches '\e+'                                 # Esc +
+Aa all-matches '\M-+'                                # Alt-+
+Aa all-matches '\M-*'                                # Alt-Shift-*
+Aa undo '\eu'                                        # Esc u
+Aa undo '\M-u'                                       # Alt-u
+Aa insert-files '\C-f'                               # Ctrl-f
+Aa predict-off '\C-g'                                # Ctrl-g
+Aa predict-on '\C-e'                                 # Ctrl-e
+Aa kill-whole-line '\C-y'                            # Ctrl-y
+Aa kill-whole-line '\C-x'                            # Ctrl-x
+Aa kill-line-maybe '\C-d'                            # Ctrl-d
+Aa yank '\C-v'                                       # Ctrl-v
+Aa quoted-insert '\C-t'                              # Ctrl-t
 
 # Make files with certain extensions "executable" (man zshbuiltins#alias)
 # Actually, we use zsh-mime-setup to this purpose.
@@ -562,8 +563,7 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' track-keymap-skip opp
 	zstyle ':auto-fu:var' enable all
 	zstyle ':auto-fu:var' disable magic-space
-	zle-line-init() auto-fu-init
-	zle -N zle-line-init
+	zle -N zle-line-init auto-fu-init
 	zle -N zle-keymap-select auto-fu-zle-keymap-select
 	zstyle ':completion:*' completer _complete
 
