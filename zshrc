@@ -211,6 +211,119 @@ whence sudox NUL && compdef ssudox=sudox
 
 compdef mplayer2=mplayer
 
+# Set keyboard transmit mode during zle so that $terminfo is reliable
+
+if [[ -n ${+terminfo[smkx]} ]]
+then	init-transmit-mode() {
+	emulate -L zsh
+	printf '%s' ${terminfo[smkx]}
+}
+	zle -N zle-line-init init-transmit-mode
+fi
+
+if [[ -n ${+terminfo[smkx]} ]]
+then	exit-transit-mode() {
+	emulate -L zsh
+	printf '%s' ${terminfo[rmkx]}
+}
+	zle -N zle-line-exit exit-transit-mode
+fi
+
+typeset -A key
+key+=(
+	BackSpace "${terminfo[kbs]}"
+	Home      "${terminfo[khome]}"
+	End       "${terminfo[kend]}"
+	Insert    "${terminfo[kich1]}"
+	Delete    "${terminfo[kdch1]}"
+	Up        "${terminfo[kcuu1]}"
+	Down      "${terminfo[kcud1]}"
+	Left      "${terminfo[kcub1]}"
+	Right     "${terminfo[kcuf1]}"
+	PageUp    "${terminfo[kpp]}"
+	PageDown  "${terminfo[knp]}"
+)
+() {
+local i k=
+for i in \
+	Return          '\C-M' \
+	Meta-Return     '\M-\C-M' \
+	Escape-Return   '\e\C-m' \
+	Shift-Return    '\e[[[sR' \
+	Ctrl-Return     '\e[[[cR' \
+	AltGr-Return    '\e[[[gR' \
+	Shift-Insert    '\e[[[[sI' \
+	Ctrl-Up         '\e[1;5A' \
+	Ctrl-Down       '\e[1;5D' \
+	Meta-Up         '\e[1;3A' \
+	Meta-Down       '\e[1;3B' \
+	Shift-Up        '\e[1;2A' \
+	Shift-Down      '\e[1;2B' \
+	AltGr-Up        '\e[[[gu' \
+	AltGr-Down      '\e[[[gd' \
+	Meta-PageUp     '\e[5;3~' \
+	Meta-PageDown   '\e[6;3~' \
+	Ctrl-PageUp     '\e[40~' \
+	Ctrl-PageDown   '\e[41~' \
+	Ctrl-Left       '\eOD' \
+	Ctrl-Right      '\eOC' \
+	Ctrl-Delete     '\e[[[cD' \
+	Shift-Home      '\e[1;2H' \
+	AltGr-BackSpace '\e[[[gb' \
+	Ctrl-BackSpace  '\e[[[cb' \
+	Shift-BackSpace '\e[[[sb' \
+	F10             '\e[21' \
+	Shift-F10       '\e[21;2~' \
+	AltGr-F10       '\e[21~' \
+	Meta-Hash       '\M-#' \
+	Escape-Tab      '\e\C-i' \
+	Escape-Star     '\e*' \
+	Meta-Shift-Star '\M-*' \
+	Escape-Plus     '\e+' \
+	Ctrl-Space      '\C- ' \
+	Ctrl-Plus       '\C-+' \
+	Meta-Plus       '\M-+' \
+	Ctrl-Dot        '\C-.' \
+	Meta-Dot        '\M-.' \
+	Escape-Space    '\e- ' \
+	Meta-Space      '\M- ' \
+	Escape-u        '\eu' \
+	Meta-u          '\M-u' \
+	Ctrl-a          '\C-a' \
+	Ctrl-b          '\C-b' \
+	Ctrl-c          '\C-c' \
+	Ctrl-d          '\C-d' \
+	Ctrl-e          '\C-e' \
+	Ctrl-f          '\C-f' \
+	Ctrl-g          '\C-g' \
+	Ctrl-h          '\C-h' \
+	Ctrl-i          '\C-i' \
+	Ctrl-j          '\C-j' \
+	Ctrl-k          '\C-k' \
+	Ctrl-l          '\C-l' \
+	Ctrl-m          '\C-m' \
+	Ctrl-n          '\C-n' \
+	Ctrl-o          '\C-o' \
+	Ctrl-p          '\C-p' \
+	Ctrl-q          '\C-q' \
+	Ctrl-r          '\C-r' \
+	Ctrl-s          '\C-s' \
+	Ctrl-t          '\C-t' \
+	Ctrl-u          '\C-u' \
+	Ctrl-v          '\C-v' \
+	Ctrl-w          '\C-w' \
+	Ctrl-x          '\C-x' \
+	Ctrl-y          '\C-y' \
+	Ctrl-z          '\C-z' \
+	Escape          '\e'
+do	if [[ -z $k ]]
+	then	k=$i
+	else	[[ -n ${key[(r)"$i"]} ]] || key[$k]=$i
+		k=
+	fi
+done
+}
+
 # Wrapper function for bindkey: multiple keys, '$...' refers to terminfo;
 # - means -M menuselect
 
@@ -226,10 +339,11 @@ Aa() {
 	shift
 	while [[ ${#} -gt 0 ]]
 	do	case ${1} in
-		'$'*)
-			c=${terminfo[${1#?}]};;
-		*)
-			c=$1;;
+		(*[^-a-zA-Z0-9_]*)
+			c=$1
+			[[ -n ${key[(r)"$1"]} ]] || c=;;
+		(*)
+			c=${key[${1}]};;
 		esac
 		[[ -z $c ]] || bindkey $a $c $b
 		shift
@@ -239,24 +353,19 @@ Aa() {
 # Line editing during completion (man zshmodules: zsh/complist)
 
 zmodload zsh/complist
-Aa - accept-and-infer-next-history '\C-M'      # Return
-Aa - accept-and-hold '\M-\C-m' '\C-Í'          # Alt-Return
-Aa - accept-and-hold '\e[[[sR '                # Shift-Return
-Aa - accept-and-hold '\e\C-m'                  # Esc Return
-Aa - accept-and-hold '\e- '                    # Esc Space
-Aa - accept-and-hold '\M- '                    # Alt-Space
-Aa - accept-and-hold '\C- '                    # Ctrl-Space
-Aa - accept-and-hold '\C-+'                    # Ctrl-+
-Aa - undo '\C-?' '\C-H' '$kbs'                 # Backspace
-Aa - undo '\C-.'                               # Ctrl-.
-Aa - undo '\M-.'                               # Alt-.
-Aa - send-break '\e'                           # Esc
-Aa - send-break '\C-c'                         # Ctrl-C
-Aa - backward-word '\e[5~' '$kpp'              # PgUp
-Aa - forward-word  '\e[6~' '$knp'              # PgDn
-Aa - history-incremental-search-forward '\C-l' # Ctrl-L
-Aa - vi-insert '\e[2~'                         # Insert
-Aa - vi-insert '\e[[[[sI'                      # Shift-Insert
+Aa - accept-and-infer-next-history Return
+Aa - accept-and-hold Meta-Return '\M-\C-m' '\C-Í' \
+	Escape-Return Shift-Return Ctrl-Return AltGr-Return \
+	Escape-Space Meta-Space Ctrl-Space \
+	Ctrl-Plus
+Aa - undo BackSpace '\C-?' '\C-H' \
+	Ctrl-Dot Meta-Dot
+Aa - send-break Esc Ctrl-c
+Aa - backward-word PageUp  '\e[5~'
+Aa - forward-word PageDown '\e[6~'
+Aa - history-incremental-search-forward Ctrl-l
+Aa - vi-insert Insert '\e[2~'
+Aa - vi-insert Shift-Insert
 
 
 # Line editing (man zshzle)
@@ -277,61 +386,54 @@ kill-line-maybe() {
 zle -N kill-line-maybe
 
 bindkey -e
-Aa history-beginning-search-backward '\e[A' '$kcuu1' # Up
-Aa history-beginning-search-forward  '\e[B' '$kcud1' # Down
-Aa up-line-or-history '\e[[[cu' '\e[1;5A'            # Ctrl-Up
-Aa down-line-or-history '\e[[[cd' '\e[1;5D'          # Ctrl-Dn
-Aa up-line-or-history '\C-aap' '\e[1;3A' '\e[[[au'   # Alt-Up
-Aa down-line-or-history '\C-aan' '\e[1;3B' '\e[[[ad' # Alt-Dn
-Aa up-line-or-history '\e[[[su' '\e[1;2A'            # Shift-Up
-Aa down-line-or-history '\e[[[sd' '\e[1;2B'          # Shift-Dn
-Aa beginning-of-history '\e[[[gu'                    # AltGr-Up
-Aa end-of-history '\e[[[gd'                          # AltGr-Dn
-Aa up-line-or-history '\e[5~' '$kpp'                 # PgUp
-Aa down-line-or-history '\e[6~' '$knp'               # PgDn
-Aa beginning-of-history '\e[5;3~' '\M-\e[5~'         # Meta-PgUp
-Aa end-of-history '\e[6;3~' '\M-\e[6~'               # Meta-PgDn
-Aa beginning-of-history '\e[40~' '\e[5;5~'           # Ctrl-PgUp
-Aa end-of-history '\e[41~' '\e[6;5~'                 # Ctrl-PgDn
-Aa backward-char '\e[D' '$kcub1'                     # Left
-Aa forward-char '\e[C' '$kcuf1'                      # Right
-Aa backward-word '\e[[[cl' '\eOD' '\e[1;5D'          # Ctrl-Left
-Aa forward-word '\e[[[cr' '\e[1;5C' '\eOC'           # Ctrl-Right
-Aa delete-char '\e[3~' '$kdch1'                      # Delete
-Aa kill-line-maybe '\e[[[cD'                         # Ctrl-Delete
-Aa overwrite-mode '\e[2~' '$kich1'                   # Insert
-Aa overwrite-mode '\e[[[[sI'                         # Shift-Insert
-Aa beginning-of-line '\e[1~' '\e[H' '$khome'         # Home
-Aa end-of-line '\e[4~' '\e[F' '$kend'                # End
-Aa clear-screen '\e[[[sH' '\e[1;2H'                  # Shift-Home
-Aa backward-delete-char '\C-?' '\C-H' '$kbs'         # Backspace
-Aa backward-kill-line '\e[[[gb'                      # AltGr-Backspace
-Aa kill-line-maybe '\e[[[cb'                         # Ctrl-Backspace
-Aa kill-line-maybe '\e[[[sb'                         # Shift-Backspace
-Aa insert-completions '\e[[[sR'                      # Shift-Return
-Aa insert-completions '\e[[[cR'                      # Ctrl-Return
-Aa call-last-kbd-macro '\e[[[gR'                     # AltGr-Return
-Aa pound-insert '\M\C-m' '\C-Í'                      # Alt-Return
-Aa push-input '\e\C-m'                               # Esc Return
-Aa describe-key-briefly '\e[21'                      # F10
-Aa describe-key-briefly '\e[21;2~'                   # Shift-F10
-Aa describe-key-briefly '\e[21~'                     # AltGr-F10
-Aa pound-insert '\M-#' '£'                           # Alt-#
-Aa all-matches '\e\C-i'                              # Esc Tab
-Aa all-matches '\e*'                                 # Esc *
-Aa all-matches '\e+'                                 # Esc +
-Aa all-matches '\M-+'                                # Alt-+
-Aa all-matches '\M-*'                                # Alt-Shift-*
-Aa undo '\eu'                                        # Esc u
-Aa undo '\M-u'                                       # Alt-u
-Aa insert-files '\C-f'                               # Ctrl-f
-Aa predict-off '\C-g'                                # Ctrl-g
-Aa predict-on '\C-e'                                 # Ctrl-e
-Aa kill-whole-line '\C-y'                            # Ctrl-y
-Aa kill-whole-line '\C-x'                            # Ctrl-x
-Aa kill-line-maybe '\C-d'                            # Ctrl-d
-Aa yank '\C-v'                                       # Ctrl-v
-Aa quoted-insert '\C-t'                              # Ctrl-t
+Aa history-beginning-search-backward Up '\e[A'
+Aa history-beginning-search-forward Down '\e[B'
+Aa up-line-or-history Ctrl-Up '\e[[[cu'
+Aa down-line-or-history Ctrl-Down '\e[[[cd'
+Aa up-line-or-history Meta-Up '\C-aap' '\e[[[au'
+Aa down-line-or-history Meta-Down '\C-aan' '\e[[[ad'
+Aa up-line-or-history Shift-Up '\e[[[su'
+Aa down-line-or-history Shift-Down '\e[[[sd'
+Aa beginning-of-history AltGr-Up
+Aa end-of-history AltGr-Down
+Aa up-line-or-history PageUp '\e[5~'
+Aa down-line-or-history PageDown '\e[6~'
+Aa beginning-of-history Meta-PageDown '\M-\e[5~'
+Aa end-of-history Meta-PageUp '\M-\e[6~'
+Aa beginning-of-history Ctrl-PageUp '\e[5;5~'
+Aa end-of-history Ctrl-PgDown '\e[6;5~'
+Aa backward-char Left '\e[D'
+Aa forward-char Right '\e[C'
+Aa backward-word Ctrl-Left '\e[1;5D' '\e[[[cl'
+Aa forward-word Ctrl-Right '\e[[[cr' '\e[1;5C'
+Aa delete-char Delete '\e[3~'
+Aa kill-line-maybe Ctrl-Delete
+Aa overwrite-mode Insert '\e[2~' \
+	Shift-Insert
+Aa beginning-of-line Home '\e[1~' '\e[H'
+Aa end-of-line End '\e[4~' '\e[F'
+Aa clear-screenShift-Home '\e[[[sH'
+Aa backward-delete-char BackSpace '\C-?' '\C-H'
+Aa backward-kill-line AltGr-BackSpace
+Aa kill-line-maybe Ctrl-BackSpace Shift-BackSpace
+Aa insert-completions Shift-Return Ctrl-Return
+Aa call-last-kbd-macro AltGr-Return
+Aa pound-insert Meta-Return '\M-\C-m' '\C-Í'
+Aa push-input Escape-Return
+Aa describe-key-briefly F10
+Aa describe-key-briefly Shift-F10
+Aa describe-key-briefly AltGr-F10
+Aa pound-insert Meta-Hash '£'
+Aa all-matches Escape-Tab Escape-Star Escape-Plus Meta-Plus Meta-Shift-Star
+Aa undo Escape-u Meta-u
+Aa insert-files Ctrl-f
+Aa predict-off Ctrl-g
+Aa predict-on Ctrl-e
+Aa kill-whole-line Ctrl-y Ctrl-x
+Aa kill-line-maybe Ctrl-d
+Aa yank Ctrl-v
+Aa quoted-insert Ctrl-t
+
 
 # Make files with certain extensions "executable" (man zshbuiltins#alias)
 # Actually, we use zsh-mime-setup to this purpose.
@@ -446,49 +548,49 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			fg=153,bold
 		)
 		ZSH_HIGHLIGHT_STYLES+=(
-			'default'			fg=252
-			'unknown-token'			fg=64,bold
-			'reserved-word'			fg=84,bold
-			'alias'				fg=118,bold
-			'builtin'			fg=47,bold
-			'function'			fg=76,bold
-			'command'			fg=40,bold
-			'precommand'			fg=40,bold
-			'hashed-command'		fg=40,bold
-			'path'				fg=214,bold
-			'path_prefix'			fg=214,bold
-			'path_approx'			none
-			'globbing'			fg=190,bold
-			'history-expansion'		fg=166,bold
-			'single-hyphen-option'		fg=33,bold
-			'double-hyphen-option'		fg=45,bold
-			'back-quoted-argument'		fg=202
-			'single-quoted-argument'	fg=181,bold
-			'double-quoted-argument'	fg=181,bold
-			'dollar-double-quoted-argument'	fg=196
-			'back-double-quoted-argument'	fg=202
-			'assign'			fg=159,bold
-			'bracket-error'			fg=196,bold
+			'default'                       fg=252
+			'unknown-token'                 fg=64,bold
+			'reserved-word'                 fg=84,bold
+			'alias'                         fg=118,bold
+			'builtin'                       fg=47,bold
+			'function'                      fg=76,bold
+			'command'                       fg=40,bold
+			'precommand'                    fg=40,bold
+			'hashed-command'                fg=40,bold
+			'path'                          fg=214,bold
+			'path_prefix'                   fg=214,bold
+			'path_approx'                   none
+			'globbing'                      fg=190,bold
+			'history-expansion'             fg=166,bold
+			'single-hyphen-option'          fg=33,bold
+			'double-hyphen-option'          fg=45,bold
+			'back-quoted-argument'          fg=202
+			'single-quoted-argument'        fg=181,bold
+			'double-quoted-argument'        fg=181,bold
+			'dollar-double-quoted-argument' fg=196
+			'back-double-quoted-argument'   fg=202
+			'assign'                        fg=159,bold
+			'bracket-error'                 fg=196,bold
 		)
 		if [[ ${SOLARIZED:-n} != [nNfF0]* ]]
 		then	ZSH_HIGHLIGHT_STYLES+=(
-			'default'			none
-			'unknown-token'			fg=red,bold
-			'reserved-word'			fg=white
-			'alias'				fg=cyan,bold
-			'builtin'			fg=yellow,bold
-			'function'			fg=blue,bold
-			'command'			fg=green
-			'precommand'			fg=green
-			'hashed-command'		fg=green
-			'path'				fg=yellow
-			'path_prefix'			fg=yellow
-			'path_approx'			none
-			'globbing'			fg=magenta
-			'single-hyphen-option'		fg=green,bold
-			'double-hyphen-option'		fg=magenta,bold
-			'assign'			fg=cyan
-			'bracket-error'			fg=red
+			'default'                       none
+			'unknown-token'                 fg=red,bold
+			'reserved-word'                 fg=white
+			'alias'                         fg=cyan,bold
+			'builtin'                       fg=yellow,bold
+			'function'                      fg=blue,bold
+			'command'                       fg=green
+			'precommand'                    fg=green
+			'hashed-command'                fg=green
+			'path'                          fg=yellow
+			'path_prefix'                   fg=yellow
+			'path_approx'                   none
+			'globbing'                      fg=magenta
+			'single-hyphen-option'          fg=green,bold
+			'double-hyphen-option'          fg=magenta,bold
+			'assign'                        fg=cyan
+			'bracket-error'                 fg=red
 		)
 		fi
 	else	ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES=(
@@ -499,29 +601,29 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			fg=green
 		)
 		ZSH_HIGHLIGHT_STYLES+=(
-			'default'			none
-			'unknown-token'			fg=red,bold
-			'reserved-word'			fg=green,bold
-			'alias'				fg=green,bold
-			'builtin'			fg=green,bold
-			'function'			fg=green,bold
-			'command'			fg=yellow,bold
-			'precommand'			fg=yellow,bold
-			'hashed-command'		fg=yellow,bold
-			'path'				fg=white,bold
-			'path_prefix'			fg=white,bold
-			'path_approx'			none
-			'globbing'			fg=magenta,bold
-			'history-expansion'		fg=yellow,bold,bg=red
-			'single-hyphen-option'		fg=cyan,bold
-			'double-hyphen-option'		fg=cyan,bold
-			'back-quoted-argument'		fg=yellow,bg=blue
-			'single-quoted-argument'	fg=yellow
-			'double-quoted-argument'	fg=yellow
-			'dollar-double-quoted-argument'	fg=yellow,bg=blue
-			'back-double-quoted-argument'	fg=yellow,bg=blue
-			'assign'			fg=yellow,bold,bg=blue
-			'bracket-error'			fg=red,bold
+			'default'                       none
+			'unknown-token'                 fg=red,bold
+			'reserved-word'                 fg=green,bold
+			'alias'                         fg=green,bold
+			'builtin'                       fg=green,bold
+			'function'                      fg=green,bold
+			'command'                       fg=yellow,bold
+			'precommand'                    fg=yellow,bold
+			'hashed-command'                fg=yellow,bold
+			'path'                          fg=white,bold
+			'path_prefix'                   fg=white,bold
+			'path_approx'                   none
+			'globbing'                      fg=magenta,bold
+			'history-expansion'             fg=yellow,bold,bg=red
+			'single-hyphen-option'          fg=cyan,bold
+			'double-hyphen-option'          fg=cyan,bold
+			'back-quoted-argument'          fg=yellow,bg=blue
+			'single-quoted-argument'        fg=yellow
+			'double-quoted-argument'        fg=yellow
+			'dollar-double-quoted-argument' fg=yellow,bg=blue
+			'back-double-quoted-argument'   fg=yellow,bg=blue
+			'assign'                        fg=yellow,bold,bg=blue
+			'bracket-error'                 fg=red,bold
 		)
 	fi
 	() {
@@ -563,7 +665,14 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' track-keymap-skip opp
 	zstyle ':auto-fu:var' enable all
 	zstyle ':auto-fu:var' disable magic-space
-	zle -N zle-line-init auto-fu-init
+	if [[ $(whence -w init-transit-mode) == *'function' ]]
+	then	zle-line-init() {
+	init-transit-mode
+	auto-fu-init
+}
+		zle -N zle-line-init
+	else	zle -N zle-line-init auto-fu-init
+	fi
 	zle -N zle-keymap-select auto-fu-zle-keymap-select
 	zstyle ':completion:*' completer _complete
 
