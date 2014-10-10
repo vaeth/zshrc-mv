@@ -205,6 +205,9 @@ whence sudox NUL && compdef ssudox=sudox
 	for i in emerge squashmount squash_dir
 	do	whence $i NUL && alias $i="noglob $i"
 	done
+	for i in rsync{,p}{,i}{,.bare}.wrapper
+	do	whence $i NUL && compdef $i=rsync
+	done
 }
 
 # Poor man's substitute for missing completions:
