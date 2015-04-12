@@ -132,6 +132,7 @@ done
 # Completion System (man zshcompsys):
 
 #zstyle ':completion:*' file-list true # if used, list-colors is ignored
+#zstyle ':completion:*' show-ambiguity true # if used, list-colors is essentially ignored
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*:*:*:*:processes' list-colors '=(#b) #([0-9]#) #([0-9a-z/-]# #[0-9:]# #)*=01;32=01;36=01;33'
 zstyle ':completion:*:*:*:*:hosts' list-colors '=*=00;36'
@@ -458,18 +459,18 @@ Aa() {
 }
 Aa XFIG xfig
 Aa BROWSER pick-web-browser
-Aa SOUNDPLAYER -mplayer2 -mplayer
-Aa MOVIEPLAYER -mplayer2 -mplayer smplayer xine-ui kaffeine vlc false
+Aa SOUNDPLAYER -mplayer -mpv -mplayer2
+Aa MOVIEPLAYER -mplayer -mpv -mplayer2 smplayer smplayer2 xine-ui kaffeine vlc false
 Aa EDITOR -e emacs -vim -vi
 Aa DVIVIEWER xdvi kdvi okular evince
-Aa PDFVIEWER zathura mupdf qpdfview apvlv okular evince acroread
+Aa PDFVIEWER qpdfview mupdf okular evince zathura apvlv acroread
 Aa DJVREADER djview djview4 okular evince
 Aa EPUBREADER fbreader calibre firefox
 Aa MOBIREADER fbreader calibre
 Aa LITREADER calibre
 Aa VIEWER {p,}qiv feh kquickshow gwenview eog xv {gimage,gq,qpic}view viewnior
 Aa PSVIEWER {,g}gv
-Aa OFFICE {s,libre,o}office
+Aa OFFICE {libre,o,s}office
 
 # Now we associate extensions to the above programs
 
