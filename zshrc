@@ -492,7 +492,7 @@ Aa BROWSER htm{l,} xhtml
 Aa PDFVIEWER pdf
 Aa DJVREADER djv{u,}
 Aa EPUBREADER epub
-Aa MOBIREADER mobi
+Aa MOBIREADER mobi prc
 Aa LITREADER lit
 Aa EDITOR txt text {read,}me 1st now {i,}nfo diz \
 	tex bib sty cls {d,l}tx ins clo fd{d,} \
