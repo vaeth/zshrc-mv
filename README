@@ -30,7 +30,7 @@ Concerning the colors which zshrc sets, only the following cases are tested
    Ethan Schoonover's solarized colorscheme.
    Both, light and dark schemes of solarized are tested.
    You have to tell zshrc that you want solarized by setting
-   SOLARIZED="true" (or "light" or "dark").
+   SOLARIZED=true (or "light" or "dark").
 
 Note that the provided zshrc file cares only about zsh specific features,
 not about "standard" variables, aliases, or functions which you would

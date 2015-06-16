@@ -31,7 +31,7 @@ alias -g 'NIL'='>&/dev/null'
 
 case $TERM in
 (xterm|screen|tmux|rxvt)
-	TERM="${TERM}-256color";;
+	TERM=$TERM-256color;;
 esac
 
 
@@ -101,7 +101,7 @@ do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
 		alias help=run-help
-		[[ -n ${HELPDIR} ]] || unset HELPDIR
+		[[ -n $HELPDIR ]] || unset HELPDIR
 		break
 	}
 done
@@ -120,9 +120,9 @@ done
 		local i
 		for i in \
 			${DEFAULTS:+{^DEFAULTS%/}/DIR_COLORS} \
-			"${HOME}/.dircolors" \
+			"$HOME/.dircolors" \
 			'/etc/DIR_COLORS'
-		do	[[ -f $i ]] && eval "$(dircolors -- "${i}")" && break
+		do	[[ -f $i ]] && eval "$(dircolors -- "$i")" && break
 		done
 	}
 	fi
@@ -195,7 +195,7 @@ whence sudox NUL && compdef ssudox=sudox
 () {
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
-	do	for j in ${i}.{32,64}
+	do	for j in $i.{32,64}
 		do	whence $j NUL && compdef $j=$i && alias $j="noglob $j"
 		done
 		whence $i NUL && alias $i="noglob $i"
@@ -341,13 +341,13 @@ Aa() {
 	fi
 	b=$1
 	shift
-	while [[ ${#} -gt 0 ]]
-	do	case ${1} in
+	while [[ $# -gt 0 ]]
+	do	case $1 in
 		(*[^-a-zA-Z0-9_]*)
 			c=$1
 			[[ -n ${key[(r)"$1"]} ]] || c=;;
 		(*)
-			c=${key[${1}]};;
+			c=${key[$1]};;
 		esac
 		[[ -z $c ]] || bindkey $a $c $b
 		shift
@@ -453,7 +453,7 @@ Aa() {
 	for i
 	do	whence ${i#-} NIL && r=$i && break
 	done
-	typeset -g $j="${r#-}"
+	typeset -g $j=${r#-}
 	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal \
 		|| unset ${j}_flags
 }
@@ -475,7 +475,7 @@ Aa OFFICE {libre,o,s}office
 # Now we associate extensions to the above programs
 
 Aa() {
-	local i j=\$$1 k=${1}_flags
+	local i j=\$$1 k=$1_flags
 	shift
 	for i
 	do	zstyle ":mime:.$i:*" handler $j %s
