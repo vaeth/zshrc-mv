@@ -171,7 +171,7 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 
 # Initialize the completion system
 whence compinit NUL || {
-	[[ -n ${DEFAULTS-} ]] && () {
+	[[ -n ${DEFAULTS++} ]] && () {
 		setopt local_options null_glob
 		local -a d
 		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(/))
@@ -222,14 +222,11 @@ then	init-transmit-mode() {
 	emulate -L zsh
 	printf '%s' ${terminfo[smkx]}
 }
-	zle -N zle-line-init init-transmit-mode
-fi
-
-if [[ -n ${+terminfo[smkx]} ]]
-then	exit-transit-mode() {
+	exit-transit-mode() {
 	emulate -L zsh
 	printf '%s' ${terminfo[rmkx]}
 }
+	zle -N zle-line-init init-transmit-mode
 	zle -N zle-line-exit exit-transit-mode
 fi
 
@@ -322,7 +319,7 @@ for i in \
 	Escape          '\e'
 do	if [[ -z $k ]]
 	then	k=$i
-	else	[[ -n ${key[(r)"$i"]-} ]] && key[$k]=$i || key[$k]=
+	else	[[ -z ${key[(r)"$i"]++} ]] && key[$k]=$i || key[$k]=
 		k=
 	fi
 done
@@ -345,7 +342,7 @@ Aa() {
 	do	case $1 in
 		(*[^-a-zA-Z0-9_]*)
 			c=$1
-			[[ -n ${key[(r)"$1"]-} ]] || c=;;
+			[[ -n ${key[(r)"$1"]++} ]] || c=;;
 		(*)
 			c=${key[$1]};;
 		esac
@@ -528,15 +525,16 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 
-if [[ -n ${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES+1} && $#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] \
-	&& is-at-least 4.3.9 &&
+if [[ -z ${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES++} ]] || \
+	$#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] && \
+	is-at-least 4.3.9 && \
 	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
 	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
 	done)" NIL
 then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
-	ZSH_HIGHLIGHT_HIGHLIGHTERS+=(
+	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
 #		patterns	# color according to ZSH_HIGHLIGHT_PATTERNS
 		brackets	# color matching () {} [] pairs
@@ -544,7 +542,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 #		root		# color if you are root; broken in some versions
 	)
 	typeset -gUa ZSH_ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS
-	ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS+=(sudo fakeroot fakeroot-ng)
+	ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS=(sudo fakeroot fakeroot-ng)
 	typeset -ga ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES
 	typeset -gA ZSH_HIGHLIGHT_STYLES
 	if [[ $(echotc Co) -ge 256 ]]
@@ -555,7 +553,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			fg=147,bold
 			fg=153,bold
 		)
-		ZSH_HIGHLIGHT_STYLES+=(
+		ZSH_HIGHLIGHT_STYLES=(
 			'default'                       fg=252
 			'unknown-token'                 fg=64,bold
 			'reserved-word'                 fg=84,bold
@@ -608,7 +606,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			fg=red
 			fg=green
 		)
-		ZSH_HIGHLIGHT_STYLES+=(
+		ZSH_HIGHLIGHT_STYLES=(
 			'default'                       none
 			'unknown-token'                 fg=red,bold
 			'reserved-word'                 fg=green,bold
