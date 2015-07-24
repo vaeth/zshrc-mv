@@ -46,6 +46,11 @@ If you want to make use of that feature, you must have set
 	interactive=/path/to/bashrc_file_for_interactive_mode
 when sourcing zshrc (or set it in the beginning of zshrc).
 
+In order to make it easier to you to modify details set in zshrc,
+you can define a function "after_zshrc": If this function is defined,
+it is called at the very end of zshrc (passing the arguments of the shell),
+so you can undo/extend any change done in zshrc if you wish to.
+
 Also some other paths are configurable if you have set
 	DEFAULTS=(/paths/to/dirs/with/local/configuration/data)
 	# (as usual in zsh, this can be an array or a variable)

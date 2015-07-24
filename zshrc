@@ -504,7 +504,7 @@ Aa SOUNDPLAYER au mp3 ogg flac aac mpc mid{i,} cmf cms xmi voc wav mod \
 Aa VIEWER gif pcx bmp {p,m}ng xcf xwd cpi tga tif{f,} img pi{1,2,3,c} \
 	p{n,g,c}m {b,x}bm xpm jp{g,e,eg} iff art wpg rle
 Aa MOVIEPLAYER mp{g,eg} m2v avi flv mkv ogm mp4{,v} m4v mov qt wmv asf \
-	rm{,vb} flc fli gl dl swf 3gp vob
+	rm{,vb} flc fli gl dl swf 3gp vob web webm
 unset -f Aa
 
 # For other extensions, we use the defaults of zsh-mime-setup
@@ -689,3 +689,5 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*|eix(|32|64)[[:blank:]]*'
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
+
+[[ $(whence -w after_zshrc) != *'function' ]] || after_zshrc "$@"
