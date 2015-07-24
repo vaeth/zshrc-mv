@@ -15,7 +15,7 @@ export SHELL=/bin/zsh
 () {
 	emulate -L sh
 	setopt ksh_glob no_sh_glob brace_expand no_nomatch
-	[[ -f $interactive ]] && . "$interactive"
+	[[ -n ${interactive-} ]] && [[ -f $interactive ]] && . "$interactive"
 }
 
 # Some pipe aliases which cannot be defined for bash:
@@ -29,7 +29,7 @@ alias -g 'NIL'='>&/dev/null'
 
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
-case $TERM in
+case ${TERM-} in
 (xterm|screen|tmux|rxvt)
 	TERM=$TERM-256color;;
 esac
@@ -101,7 +101,7 @@ do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
 		alias help=run-help
-		[[ -n $HELPDIR ]] || unset HELPDIR
+		[[ -n ${HELPDIR-} ]] || unset HELPDIR
 		break
 	}
 done
@@ -112,7 +112,7 @@ done
 # I recommend https://github.com/vaeth/termcolors-mv/
 # but a fallback is used if the corresponding script is not in path.
 
-[[ -n $LS_COLORS ]] || {
+[[ -n ${LS_COLORS-} ]] || {
 	if whence dircolors-mv NUL
 	then	eval "$(SOLARIZED=$SOLARIZED dircolors-mv)"
 	elif whence dircolor NUL
@@ -171,7 +171,7 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 
 # Initialize the completion system
 whence compinit NUL || {
-	[[ -n $DEFAULTS ]] && () {
+	[[ -n ${DEFAULTS-} ]] && () {
 		setopt local_options null_glob
 		local -a d
 		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(/))
@@ -234,7 +234,7 @@ then	exit-transit-mode() {
 fi
 
 typeset -A key
-key+=(
+key=(
 	BackSpace "${terminfo[kbs]}"
 	Home      "${terminfo[khome]}"
 	End       "${terminfo[kend]}"
@@ -322,7 +322,7 @@ for i in \
 	Escape          '\e'
 do	if [[ -z $k ]]
 	then	k=$i
-	else	[[ -n ${key[(r)"$i"]} ]] || key[$k]=$i
+	else	[[ -n ${key[(r)"$i"]-} ]] && key[$k]=$i || key[$k]=
 		k=
 	fi
 done
@@ -334,7 +334,7 @@ done
 Aa() {
 	local b c
 	local -a a
-	if [[ $1 == - ]]
+	if [[ ${1-} == - ]]
 	then	a=(-M menuselect)
 		shift
 	else	a=()
@@ -345,7 +345,7 @@ Aa() {
 	do	case $1 in
 		(*[^-a-zA-Z0-9_]*)
 			c=$1
-			[[ -n ${key[(r)"$1"]} ]] || c=;;
+			[[ -n ${key[(r)"$1"]-} ]] || c=;;
 		(*)
 			c=${key[$1]};;
 		esac
@@ -364,7 +364,7 @@ Aa - accept-and-hold Meta-Return '\M-\C-m' '\C-Í' \
 	Ctrl-Plus
 Aa - undo BackSpace '\C-?' '\C-H' \
 	Ctrl-Dot Meta-Dot
-Aa - send-break Esc Ctrl-c
+Aa - send-break Escape Ctrl-c
 Aa - backward-word PageUp  '\e[5~'
 Aa - forward-word PageDown '\e[6~'
 Aa - history-incremental-search-forward Ctrl-l
@@ -405,7 +405,7 @@ Aa down-line-or-history PageDown '\e[6~'
 Aa beginning-of-history Meta-PageDown '\M-\e[5~'
 Aa end-of-history Meta-PageUp '\M-\e[6~'
 Aa beginning-of-history Ctrl-PageUp '\e[5;5~'
-Aa end-of-history Ctrl-PgDown '\e[6;5~'
+Aa end-of-history Ctrl-PageDown '\e[6;5~'
 Aa backward-char Left '\e[D'
 Aa forward-char Right '\e[C'
 Aa backward-word Ctrl-Left '\e[1;5D' '\e[[[cl'
@@ -446,7 +446,10 @@ Aa quoted-insert Ctrl-t
 # A leading - sign means that also ..._flags=needsterminal is set
 
 Aa() {
-	[[ -n ${(P)1} ]] && return
+	[[ -z ${(P)1-} ]] || {
+		eval "typeset -g ${1}_flags=\${${1}_flags-}"
+		return
+	}
 	local i j=$1 r
 	shift
 	r=$1
@@ -454,8 +457,8 @@ Aa() {
 	do	whence ${i#-} NIL && r=$i && break
 	done
 	typeset -g $j=${r#-}
-	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal \
-		|| unset ${j}_flags
+	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal || \
+		typeset -g ${j}_flags=
 }
 Aa XFIG xfig
 Aa BROWSER pick-web-browser
@@ -475,7 +478,7 @@ Aa OFFICE {libre,o,s}office
 # Now we associate extensions to the above programs
 
 Aa() {
-	local i j=\$$1 k=$1_flags
+	local i j=\$$1 k=${1}_flags
 	shift
 	for i
 	do	zstyle ":mime:.$i:*" handler $j %s
@@ -525,7 +528,8 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 
-if [[ $#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] && is-at-least 4.3.9 &&
+if [[ -n ${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES+1} && $#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] \
+	&& is-at-least 4.3.9 &&
 	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
