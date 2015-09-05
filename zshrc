@@ -29,6 +29,22 @@ alias -g 'NIL'='>&/dev/null'
 
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
+have_term() {
+	local i
+	for i in $TERMINFO ~/.terminfo $TERMINFO_DIRS \
+		/usr/{,share/}{,lib/}terminfo /{etc,lib}/terminfo
+	do	! [[ -z $i || ! -d $i ]] && \
+		[[ -r $i/${1:0:1}/$1 || -r $i/$1 ]] && return
+	done
+	return 1
+}
+
+case $TERM in
+(tmux*)
+	have_term tmux || TERM=screen${TERM#tmux};;
+(screen*)
+	[[ -z $TMUX ]] || ! have_term tmux || TERM=tmux${TERM#screen};;
+esac
 case ${TERM-} in
 (xterm|screen|tmux|rxvt)
 	TERM=$TERM-256color;;
