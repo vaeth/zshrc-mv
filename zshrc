@@ -12,10 +12,10 @@
 export SHELL=/bin/zsh
 
 # source $interactive in bash compatibility mode:
-() {
+[[ -n ${interactive-} ]] && [[ -f $interactive ]] && () {
 	emulate -L sh
 	setopt ksh_glob no_sh_glob brace_expand no_nomatch
-	[[ -n ${interactive-} ]] && [[ -f $interactive ]] && . "$interactive"
+	. "$interactive"
 }
 
 # Some pipe aliases which cannot be defined for bash:
@@ -31,7 +31,7 @@ alias -g 'NIL'='>&/dev/null'
 
 have_term() {
 	local i
-	for i in $TERMINFO ~/.terminfo $TERMINFO_DIRS \
+	for i in ${TERMINFO-} ~/.terminfo ${TERMINFO_DIRS-} \
 		/usr/{,share/}{,lib/}terminfo /{etc,lib}/terminfo
 	do	! [[ -z $i || ! -d $i ]] && \
 		[[ -r $i/${1:0:1}/$1 || -r $i/$1 ]] && return
@@ -39,11 +39,11 @@ have_term() {
 	return 1
 }
 
-case $TERM in
+case ${TERM-} in
 (tmux*)
 	have_term tmux || TERM=screen${TERM#tmux};;
 (screen*)
-	[[ -z $TMUX ]] || ! have_term tmux || TERM=tmux${TERM#screen};;
+	[[ -z ${TMUX-} ]] || ! have_term tmux || TERM=tmux${TERM#screen};;
 esac
 case ${TERM-} in
 (xterm|screen|tmux|rxvt)
@@ -61,16 +61,22 @@ setopt extended_glob hist_subst_pattern
 setopt no_glob_dots no_nomatch no_null_glob numeric_glob_sort no_sh_glob
 setopt mail_warning interactive_comments no_clobber
 setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
+setopt warn_create_global
 #setopt print_exit_value
+
 
 NULLCMD=:
 READNULLCMD=less
 
+
 # Show time/memory for commands running longer than this number of seconds:
+
 REPORTTIME=5
 TIMEFMT='%J  %M kB %*E (user: %*U, kernel: %*S)'
 
+
 # Restore tty settings at every prompt:
+
 ttyctl -f
 
 
@@ -81,30 +87,35 @@ unset HISTORYFILE
 
 DIRSTACKSIZE=100
 
-# Activate the prompt from https://github.com/vaeth/set_prompt/
 
-setopt no_warn_create_global
-() {
-	local i
-	i=$(whence -w set_prompt) && {
-		[[ "$i" == *'function' ]] || \
-			path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
-				$path) . set_prompt.sh
-	}
-} && {
-	set_prompt -r
-	path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}} $path) . git_prompt.zsh
-}
-setopt warn_create_global
+# We need some modules always
+
+zmodload zsh/complist
+zmodload zsh/parameter
+zmodload zsh/terminfo
 
 
-# I want zmv and other nice features (man zshcontrib)
+# We want zmv and other nice features (man zshcontrib)
 autoload -Uz zmv zcalc zargs colors
 #colors
 
-
-# These are needed in the following:
+# These are needed later on
 autoload -Uz pick-web-browser zsh-mime-setup is-at-least
+
+
+# Activate the prompt from https://github.com/vaeth/set_prompt/
+
+whence set_prompt NUL && () {
+	setopt no_warn_create_global
+	((${+functions[set_prompt]})) || \
+		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
+			$path) . set_prompt.sh \
+	&& {
+		set_prompt -r
+		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
+			$path) . git_prompt.zsh
+	}
+}
 
 
 # Initialize the helping system:
@@ -205,9 +216,9 @@ compdef _my_cd cd
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
 # Some private shell functions or wrapper scripts behave like other commands:
-compdef mcd=cd
-whence gpg NUL && compdef gpg.wrapper=gpg
-whence sudox NUL && compdef ssudox=sudox
+((${+functions[mcd]})) && compdef mcd=cd
+whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
+whence ssudox NUL && compdef ssudox=sudox
 () {
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
@@ -227,23 +238,19 @@ whence sudox NUL && compdef ssudox=sudox
 	done
 }
 
-# Poor man's substitute for missing completions:
-
-compdef mplayer2=mplayer
-
 # Set keyboard transmit mode during zle so that $terminfo is reliable
 
-if [[ -n ${+terminfo[smkx]} ]]
+if ((${+terminfo[smkx]}))
 then	init-transmit-mode() {
 	emulate -L zsh
 	printf '%s' ${terminfo[smkx]}
 }
-	exit-transit-mode() {
+	exit-transmit-mode() {
 	emulate -L zsh
 	printf '%s' ${terminfo[rmkx]}
 }
 	zle -N zle-line-init init-transmit-mode
-	zle -N zle-line-exit exit-transit-mode
+	zle -N zle-line-exit exit-transmit-mode
 fi
 
 typeset -A key
@@ -369,7 +376,6 @@ Aa() {
 
 # Line editing during completion (man zshmodules: zsh/complist)
 
-zmodload zsh/complist
 Aa - accept-and-infer-next-history Return
 Aa - accept-and-hold Meta-Return '\M-\C-m' '\C-Í' \
 	Escape-Return Shift-Return Ctrl-Return AltGr-Return \
@@ -541,9 +547,7 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 
-if [[ -z ${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES++} ]] || \
-	$#ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES -eq 0 ]] && \
-	is-at-least 4.3.9 && \
+if ! ((${+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES})) && is-at-least 4.3.9 && \
 	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
@@ -687,9 +691,9 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' track-keymap-skip opp
 	zstyle ':auto-fu:var' enable all
 	zstyle ':auto-fu:var' disable magic-space
-	if [[ $(whence -w init-transit-mode) == *'function' ]]
+	if ((${+functions[init-transmit-mode]}))
 	then	zle-line-init() {
-	init-transit-mode
+	init-transmit-mode
 	auto-fu-init
 }
 		zle -N zle-line-init
@@ -706,4 +710,4 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
 
-[[ $(whence -w after_zshrc) != *'function' ]] || after_zshrc "$@"
+! ((${+functions[after_zshrc]})) || after_zshrc "$@"
