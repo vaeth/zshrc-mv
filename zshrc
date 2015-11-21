@@ -88,11 +88,13 @@ unset HISTORYFILE
 DIRSTACKSIZE=100
 
 
-# We need some modules always
+# The code in this file needs some modules
 
 zmodload zsh/complist
 zmodload zsh/parameter
+zmodload zsh/termcap
 zmodload zsh/terminfo
+zmodload zsh/zutil
 
 
 # We want zmv and other nice features (man zshcontrib)
@@ -105,9 +107,9 @@ autoload -Uz pick-web-browser zsh-mime-setup is-at-least
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
-whence set_prompt NUL && () {
-	setopt no_warn_create_global
-	((${+functions[set_prompt]})) || \
+(($+commands[set_prompt])) && () {
+	setopt local_options no_warn_create_global
+	(($+functions[set_prompt])) || \
 		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
 			$path) . set_prompt.sh \
 	&& {
@@ -115,6 +117,19 @@ whence set_prompt NUL && () {
 		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
 			$path) . git_prompt.zsh
 	}
+}
+
+
+# Activate support for title from https://github.com/vaeth/runtitle/
+
+(($+commands[title])) && {
+	set_title() {
+	local a
+	a=${1%% *}
+	title "${a##*/}"
+}
+	typeset -aU preexec_functions
+	preexec_functions+=set_title
 }
 
 
@@ -140,9 +155,9 @@ done
 # but a fallback is used if the corresponding script is not in path.
 
 [[ -n ${LS_COLORS-} ]] || {
-	if whence dircolors-mv NUL
+	if (($+commands[dircolors-mv]))
 	then	eval "$(SOLARIZED=$SOLARIZED dircolors-mv)"
-	elif whence dircolor NUL
+	elif (($+commands[dircolors]))
 	then	() {
 		local i
 		for i in \
@@ -180,9 +195,14 @@ zstyle ':completion:*' remote-access false
 zstyle ':completion:*' use-perl true
 zstyle ':completion:*' verbose true
 zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*' accept-exact true
 zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' use-cache false
+zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*' sort false
 if is-at-least 4.3.10
 then	zstyle ':completion:*' format '%b%F{yellow}(%d)%f'
 else	zstyle ':completion:*' format '%B(%d)%b'
@@ -197,11 +217,10 @@ zstyle ':completion:all-matches:*' completer _all_matches
 zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-directories path-directories
 
 # Initialize the completion system
-whence compinit NUL || {
+(($+functions[compinit])) || {
 	[[ -n ${DEFAULTS++} ]] && () {
-		setopt local_options null_glob
 		local -a d
-		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(/))
+		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(N/))
 		fpath=(${d%/} $fpath)
 	}
 	autoload -Uz compinit
@@ -216,7 +235,7 @@ compdef _my_cd cd
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
 # Some private shell functions or wrapper scripts behave like other commands:
-((${+functions[mcd]})) && compdef mcd=cd
+(($+functions[mcd])) && compdef mcd=cd
 whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
 whence ssudox NUL && compdef ssudox=sudox
 () {
@@ -240,7 +259,7 @@ whence ssudox NUL && compdef ssudox=sudox
 
 # Set keyboard transmit mode during zle so that $terminfo is reliable
 
-if ((${+terminfo[smkx]}))
+if (($+terminfo[smkx]))
 then	init-transmit-mode() {
 	emulate -L zsh
 	printf '%s' ${terminfo[smkx]}
@@ -473,7 +492,7 @@ Aa() {
 	shift
 	r=$1
 	for i
-	do	whence ${i#-} NIL && r=$i && break
+	do	whence ${i#-} NUL && r=$i && break
 	done
 	typeset -g $j=${r#-}
 	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal || \
@@ -547,7 +566,7 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 
-if ! ((${+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES})) && is-at-least 4.3.9 && \
+if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
 	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
@@ -664,7 +683,7 @@ fi
 # Activate incremental completion, see https://github.com/hchbaw/auto-fu.zsh/
 # (Only the most current versions [branch pu] work with syntax-highlighting)
 
-if whence auto-fu-init NUL || {
+if (($+functions[auto-fu-init])) || {
 	: # Status must be 0 before sourcing auto-fu.zsh
 	path=(${DEFAULTS:+${^DEFAULTS%/}/zsh{/auto-fu{.zsh,},}} \
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
@@ -691,7 +710,7 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' track-keymap-skip opp
 	zstyle ':auto-fu:var' enable all
 	zstyle ':auto-fu:var' disable magic-space
-	if ((${+functions[init-transmit-mode]}))
+	if (($+functions[init-transmit-mode]))
 	then	zle-line-init() {
 	init-transmit-mode
 	auto-fu-init
@@ -706,8 +725,8 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	# or escaping a word should deactivate auto-fu for that line/word.
 	# This is useful e.g. if auto-fu is too slow for you in some cases.
 	# Unfortunately, for eix auto-fu is always too slow...
-	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*|eix(|32|64)[[:blank:]]*'
+	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*|(emerge|eix(|.32|.64))[[:blank:]]*'
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
 
-! ((${+functions[after_zshrc]})) || after_zshrc "$@"
+! (($+functions[after_zshrc])) || after_zshrc "$@"
