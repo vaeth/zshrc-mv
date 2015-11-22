@@ -195,7 +195,8 @@ zstyle ':completion:*' remote-access false
 zstyle ':completion:*' use-perl true
 zstyle ':completion:*' verbose true
 zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
-zstyle ':completion:*' accept-exact true
+# Unfortunately, accept-exact would prevent completing b* if b/ is a directory:
+#zstyle ':completion:*' accept-exact true
 zstyle ':completion:*' accept-exact-dirs true
 zstyle ':completion:*' path-completion false
 zstyle ':completion:*' squeeze-slashes true
