@@ -123,15 +123,16 @@ autoload -Uz pick-web-browser zsh-mime-setup is-at-least
 # Activate support for title from https://github.com/vaeth/runtitle/
 
 (($+commands[title])) && {
+	# Title are the first 2 words starting with sane chars (paths cutted)
 	set_title() {
-	local a
-	a=${1%% *}
-	title "${a##*/}"
-}
+		local -a a
+		a=(${=${(@)${=1}:t}})
+		a=(${=${a##[-\&\|\(\)\{\}\;]*}})
+		title "${a[1,2]}"
+	}
 	typeset -aU preexec_functions
 	preexec_functions+=set_title
 }
-
 
 # Initialize the helping system:
 
