@@ -12,7 +12,7 @@
 export SHELL=/bin/zsh
 
 # source $interactive in bash compatibility mode:
-[[ -n ${interactive-} ]] && [[ -f $interactive ]] && () {
+[[ -n ${interactive:++} ]] && [[ -f $interactive ]] && () {
 	emulate -L sh
 	setopt ksh_glob no_sh_glob brace_expand no_nomatch
 	. "$interactive"
@@ -43,7 +43,7 @@ case ${TERM-} in
 (tmux*)
 	have_term tmux || TERM=screen${TERM#tmux};;
 (screen*)
-	[[ -z ${TMUX-} ]] || ! have_term tmux || TERM=tmux${TERM#screen};;
+	[[ -z ${TMUX:++} ]] || ! have_term tmux || TERM=tmux${TERM#screen};;
 esac
 case ${TERM-} in
 (xterm|screen|tmux|rxvt)
@@ -98,11 +98,11 @@ zmodload zsh/zutil
 
 
 # We want zmv and other nice features (man zshcontrib)
-autoload -Uz zmv zcalc zargs colors
+autoload -Uz colors zargs zcalc zed zmv
 #colors
 
 # These are needed later on
-autoload -Uz pick-web-browser zsh-mime-setup is-at-least
+autoload -Uz add-zsh-hook pick-web-browser zsh-mime-setup is-at-least
 
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
@@ -134,8 +134,7 @@ autoload -Uz pick-web-browser zsh-mime-setup is-at-least
 		[[ $#a -gt 30 ]] && a=$a[1,22]'...'$a[-5,-1]
 		title $a$b
 	}
-	typeset -aU preexec_functions
-	preexec_functions+=set_title
+	add-zsh-hook preexec set_title
 }
 
 # Initialize the helping system:
@@ -148,7 +147,7 @@ do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
 		alias help=run-help
-		[[ -n ${HELPDIR-} ]] || unset HELPDIR
+		[[ -n ${HELPDIR:++} ]] || unset HELPDIR
 		break
 	}
 done
@@ -159,7 +158,7 @@ done
 # I recommend https://github.com/vaeth/termcolors-mv/
 # but a fallback is used if the corresponding script is not in path.
 
-[[ -n ${LS_COLORS-} ]] || {
+[[ -n ${LS_COLORS:++} ]] || {
 	if (($+commands[dircolors-mv]))
 	then	eval "$(SOLARIZED=$SOLARIZED dircolors-mv)"
 	elif (($+commands[dircolors]))
