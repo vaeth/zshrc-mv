@@ -51,6 +51,10 @@ case ${TERM-} in
 esac
 
 
+# These are needed later on
+autoload -Uz add-zsh-hook pick-web-browser zsh-mime-setup is-at-least
+
+
 # Options (man zshoptions):
 
 setopt no_auto_cd auto_pushd no_cdable_vars no_chase_dots no_chase_links
@@ -63,6 +67,7 @@ setopt mail_warning interactive_comments no_clobber
 setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
 setopt warn_create_global
 #setopt print_exit_value
+! is-at-least 5.2 || setopt glob_star_short
 
 
 NULLCMD=:
@@ -100,10 +105,6 @@ zmodload zsh/zutil
 # We want zmv and other nice features (man zshcontrib)
 autoload -Uz colors zargs zcalc zed zmv
 #colors
-
-# These are needed later on
-autoload -Uz add-zsh-hook pick-web-browser zsh-mime-setup is-at-least
-
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
