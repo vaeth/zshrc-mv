@@ -295,85 +295,85 @@ key=(
 () {
 local i k=
 for i in \
-	Return          '\C-M' \
-	Meta-Return     '\M-\C-M' \
-	Escape-Return   '\e\C-m' \
-	Shift-Return    '\e[[[sR' \
-	Ctrl-Return     '\e[[[cR' \
-	AltGr-Return    '\e[[[gR' \
-	Shift-Insert    '\e[[[[sI' \
-	Ctrl-Up         '\e[1;5A' \
-	Ctrl-Down       '\e[1;5D' \
-	Meta-Up         '\e[1;3A' \
-	Meta-Down       '\e[1;3B' \
-	Shift-Up        '\e[1;2A' \
-	Shift-Down      '\e[1;2B' \
-	AltGr-Up        '\e[[[gu' \
-	AltGr-Down      '\e[[[gd' \
-	Meta-PageUp     '\e[5;3~' \
-	Meta-PageDown   '\e[6;3~' \
-	Ctrl-PageUp     '\e[40~' \
-	Ctrl-PageDown   '\e[41~' \
-	Ctrl-Left       '\eOD' \
-	Ctrl-Right      '\eOC' \
-	Ctrl-Delete     '\e[[[cD' \
-	Shift-Home      '\e[1;2H' \
-	AltGr-BackSpace '\e[[[gb' \
-	Ctrl-BackSpace  '\e[[[cb' \
-	Shift-BackSpace '\e[[[sb' \
-	F10             '\e[21' \
-	Shift-F10       '\e[21;2~' \
-	AltGr-F10       '\e[21~' \
-	Meta-Hash       '\M-#' \
-	Escape-Tab      '\e\C-i' \
-	Escape-Star     '\e*' \
-	Meta-Shift-Star '\M-*' \
-	Escape-Plus     '\e+' \
-	Ctrl-Space      '\C- ' \
-	Ctrl-Plus       '\C-+' \
-	Meta-Plus       '\M-+' \
-	Ctrl-Dot        '\C-.' \
-	Meta-Dot        '\M-.' \
-	Escape-Space    '\e- ' \
-	Meta-Space      '\M- ' \
-	Escape-u        '\eu' \
-	Meta-u          '\M-u' \
-	Ctrl-a          '\C-a' \
-	Ctrl-b          '\C-b' \
-	Ctrl-c          '\C-c' \
-	Ctrl-d          '\C-d' \
-	Ctrl-e          '\C-e' \
-	Ctrl-f          '\C-f' \
-	Ctrl-g          '\C-g' \
-	Ctrl-h          '\C-h' \
-	Ctrl-i          '\C-i' \
-	Ctrl-j          '\C-j' \
-	Ctrl-k          '\C-k' \
-	Ctrl-l          '\C-l' \
-	Ctrl-m          '\C-m' \
-	Ctrl-n          '\C-n' \
-	Ctrl-o          '\C-o' \
-	Ctrl-p          '\C-p' \
-	Ctrl-q          '\C-q' \
-	Ctrl-r          '\C-r' \
-	Ctrl-s          '\C-s' \
-	Ctrl-t          '\C-t' \
-	Ctrl-u          '\C-u' \
-	Ctrl-v          '\C-v' \
-	Ctrl-w          '\C-w' \
-	Ctrl-x          '\C-x' \
-	Ctrl-y          '\C-y' \
-	Ctrl-z          '\C-z' \
-	Escape          '\e'
+	Return          $'\C-M' \
+	Meta-Return     $'\M-\C-M' \
+	Escape-Return   $'\e\C-m' \
+	Shift-Return    $'\e[[[sR' \
+	Ctrl-Return     $'\e[[[cR' \
+	AltGr-Return    $'\e[[[gR' \
+	Shift-Insert    $'\e[[[[sI' \
+	Ctrl-Up         $'\e[1;5A' \
+	Ctrl-Down       $'\e[1;5D' \
+	Meta-Up         $'\e[1;3A' \
+	Meta-Down       $'\e[1;3B' \
+	Shift-Up        $'\e[1;2A' \
+	Shift-Down      $'\e[1;2B' \
+	AltGr-Up        $'\e[[[gu' \
+	AltGr-Down      $'\e[[[gd' \
+	Meta-PageUp     $'\e[5;3~' \
+	Meta-PageDown   $'\e[6;3~' \
+	Ctrl-PageUp     $'\e[40~' \
+	Ctrl-PageDown   $'\e[41~' \
+	Ctrl-Left       $'\eOD' \
+	Ctrl-Right      $'\eOC' \
+	Ctrl-Delete     $'\e[[[cD' \
+	Shift-Home      $'\e[1;2H' \
+	AltGr-BackSpace $'\e[[[gb' \
+	Ctrl-BackSpace  $'\e[[[cb' \
+	Shift-BackSpace $'\e[[[sb' \
+	F10             $'\e[21' \
+	Shift-F10       $'\e[21;2~' \
+	AltGr-F10       $'\e[21~' \
+	Meta-Hash       $'\M-#' \
+	Escape-Tab      $'\e\C-i' \
+	Escape-Star     $'\e*' \
+	Meta-Shift-Star $'\M-*' \
+	Escape-Plus     $'\e+' \
+	Ctrl-Space      $'\C- $' \
+	Ctrl-Plus       $'\C-+' \
+	Meta-Plus       $'\M-+' \
+	Ctrl-Dot        $'\C-.' \
+	Meta-Dot        $'\M-.' \
+	Escape-Space    $'\e- ' \
+	Meta-Space      $'\M- ' \
+	Escape-u        $'\eu' \
+	Meta-u          $'\M-u' \
+	Ctrl-a          $'\C-a' \
+	Ctrl-b          $'\C-b' \
+	Ctrl-c          $'\C-c' \
+	Ctrl-d          $'\C-d' \
+	Ctrl-e          $'\C-e' \
+	Ctrl-f          $'\C-f' \
+	Ctrl-g          $'\C-g' \
+	Ctrl-h          $'\C-h' \
+	Ctrl-i          $'\C-i' \
+	Ctrl-j          $'\C-j' \
+	Ctrl-k          $'\C-k' \
+	Ctrl-l          $'\C-l' \
+	Ctrl-m          $'\C-m' \
+	Ctrl-n          $'\C-n' \
+	Ctrl-o          $'\C-o' \
+	Ctrl-p          $'\C-p' \
+	Ctrl-q          $'\C-q' \
+	Ctrl-r          $'\C-r' \
+	Ctrl-s          $'\C-s' \
+	Ctrl-t          $'\C-t' \
+	Ctrl-u          $'\C-u' \
+	Ctrl-v          $'\C-v' \
+	Ctrl-w          $'\C-w' \
+	Ctrl-x          $'\C-x' \
+	Ctrl-y          $'\C-y' \
+	Ctrl-z          $'\C-z' \
+	Escape          $'\e'
 do	if [[ -z $k ]]
 	then	k=$i
-	else	[[ -z ${key[(r)"$i"]++} ]] && key[$k]=$i || key[$k]=
+	else	[[ -z ${key[(re)$i]:++} ]] && key[$k]=$i || key[$k]=
 		k=
 	fi
 done
 }
 
-# Wrapper function for bindkey: multiple keys, '$...' refers to terminfo;
+# Wrapper function for bindkey: multiple keys, $'$...' refers to terminfo;
 # - means -M menuselect
 
 Aa() {
@@ -389,8 +389,7 @@ Aa() {
 	while [[ $# -gt 0 ]]
 	do	case $1 in
 		(*[^-a-zA-Z0-9_]*)
-			c=$1
-			[[ -n ${key[(r)"$1"]++} ]] || c=;;
+			[[ -z ${key[(re)$1]:++} ]] && c=$1 || c=;;
 		(*)
 			c=${key[$1]};;
 		esac
@@ -402,17 +401,17 @@ Aa() {
 # Line editing during completion (man zshmodules: zsh/complist)
 
 Aa - accept-and-infer-next-history Return
-Aa - accept-and-hold Meta-Return '\M-\C-m' '\C-Í' \
+Aa - accept-and-hold Meta-Return $'\M-\C-m' $'\C-Í' \
 	Escape-Return Shift-Return Ctrl-Return AltGr-Return \
 	Escape-Space Meta-Space Ctrl-Space \
 	Ctrl-Plus
-Aa - undo BackSpace '\C-?' '\C-H' \
+Aa - undo BackSpace $'\C-?' $'\C-H' \
 	Ctrl-Dot Meta-Dot
 Aa - send-break Escape Ctrl-c
-Aa - backward-word PageUp  '\e[5~'
-Aa - forward-word PageDown '\e[6~'
+Aa - backward-word PageUp  $'\e[5~'
+Aa - forward-word PageDown $'\e[6~'
 Aa - history-incremental-search-forward Ctrl-l
-Aa - vi-insert Insert '\e[2~'
+Aa - vi-insert Insert $'\e[2~'
 Aa - vi-insert Shift-Insert
 
 
@@ -434,39 +433,39 @@ kill-line-maybe() {
 zle -N kill-line-maybe
 
 bindkey -e
-Aa history-beginning-search-backward Up '\e[A'
-Aa history-beginning-search-forward Down '\e[B'
-Aa up-line-or-history Ctrl-Up '\e[[[cu'
-Aa down-line-or-history Ctrl-Down '\e[[[cd'
-Aa up-line-or-history Meta-Up '\C-aap' '\e[[[au'
-Aa down-line-or-history Meta-Down '\C-aan' '\e[[[ad'
-Aa up-line-or-history Shift-Up '\e[[[su'
-Aa down-line-or-history Shift-Down '\e[[[sd'
+Aa history-beginning-search-backward Up $'\e[A'
+Aa history-beginning-search-forward Down $'\e[B'
+Aa up-line-or-history Ctrl-Up $'\e[[[cu'
+Aa down-line-or-history Ctrl-Down $'\e[[[cd'
+Aa up-line-or-history Meta-Up $'\C-aap' $'\e[[[au'
+Aa down-line-or-history Meta-Down $'\C-aan' $'\e[[[ad'
+Aa up-line-or-history Shift-Up $'\e[[[su'
+Aa down-line-or-history Shift-Down $'\e[[[sd'
 Aa beginning-of-history AltGr-Up
 Aa end-of-history AltGr-Down
-Aa up-line-or-history PageUp '\e[5~'
-Aa down-line-or-history PageDown '\e[6~'
-Aa beginning-of-history Meta-PageDown '\M-\e[5~'
-Aa end-of-history Meta-PageUp '\M-\e[6~'
-Aa beginning-of-history Ctrl-PageUp '\e[5;5~'
-Aa end-of-history Ctrl-PageDown '\e[6;5~'
-Aa backward-char Left '\e[D'
-Aa forward-char Right '\e[C'
-Aa backward-word Ctrl-Left '\e[1;5D' '\e[[[cl'
-Aa forward-word Ctrl-Right '\e[[[cr' '\e[1;5C'
-Aa delete-char Delete '\e[3~'
+Aa up-line-or-history PageUp $'\e[5~'
+Aa down-line-or-history PageDown $'\e[6~'
+Aa beginning-of-history Meta-PageDown $'\M-\e[5~'
+Aa end-of-history Meta-PageUp $'\M-\e[6~'
+Aa beginning-of-history Ctrl-PageUp $'\e[5;5~'
+Aa end-of-history Ctrl-PageDown $'\e[6;5~'
+Aa backward-char Left $'\e[D'
+Aa forward-char Right $'\e[C'
+Aa backward-word Ctrl-Left $'\e[1;5D' $'\e[[[cl'
+Aa forward-word Ctrl-Right $'\e[[[cr' $'\e[1;5C'
+Aa delete-char Delete $'\e[3~'
 Aa kill-line-maybe Ctrl-Delete
-Aa overwrite-mode Insert '\e[2~' \
+Aa overwrite-mode Insert $'\e[2~' \
 	Shift-Insert
-Aa beginning-of-line Home '\e[1~' '\e[H'
-Aa end-of-line End '\e[4~' '\e[F'
-Aa clear-screenShift-Home '\e[[[sH'
-Aa backward-delete-char BackSpace '\C-?' '\C-H'
+Aa beginning-of-line Home $'\e[1~' $'\e[H'
+Aa end-of-line End $'\e[4~' $'\e[F'
+Aa clear-screen Shift-Home $'\e[[[sH'
+Aa backward-delete-char BackSpace $'\C-?' $'\C-H'
 Aa backward-kill-line AltGr-BackSpace
 Aa kill-line-maybe Ctrl-BackSpace Shift-BackSpace
 Aa insert-completions Shift-Return Ctrl-Return
 Aa call-last-kbd-macro AltGr-Return
-Aa pound-insert Meta-Return '\M-\C-m' '\C-Í'
+Aa pound-insert Meta-Return $'\M-\C-m' $'\C-Í'
 Aa push-input Escape-Return
 Aa describe-key-briefly F10
 Aa describe-key-briefly Shift-F10
