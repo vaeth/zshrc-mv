@@ -622,8 +622,10 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'assign'                        fg=159,bold
 			'bracket-error'                 fg=196,bold
 		)
-		if [[ ${SOLARIZED:-n} != [nNfF0]* ]]
-		then	ZSH_HIGHLIGHT_STYLES+=(
+		case ${SOLARIZED:-n} in
+		([nNfF0-]*|[oO][fF]*)
+			false;;
+		esac && ZSH_HIGHLIGHT_STYLES+=(
 			'default'                       none
 			'unknown-token'                 fg=red,bold
 			'reserved-word'                 fg=white
@@ -642,7 +644,6 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'assign'                        fg=cyan
 			'bracket-error'                 fg=red
 		)
-		fi
 	else	ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES=(
 			fg=cyan
 			fg=magenta
