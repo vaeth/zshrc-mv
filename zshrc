@@ -161,7 +161,9 @@ done
 
 [[ -n ${LS_COLORS:++} ]] || {
 	if (($+commands[dircolors-mv]))
-	then	eval "$(SOLARIZED=$SOLARIZED dircolors-mv)"
+	then	# If DEFAULTS is an array, export only its first word
+		eval "$(DEFAULTS=($DEFAULTS)
+SOLARIZED=$SOLARIZED DEFAULTS=${DEFAULTS[1]} dircolors-mv)"
 	elif (($+commands[dircolors]))
 	then	() {
 		local i
@@ -226,7 +228,7 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 (($+functions[compinit])) || {
 	[[ -n ${DEFAULTS++} ]] && () {
 		local -a d
-		d=(${^DEFAULTS%/}{/zsh,}/completion/***/(N/))
+		d=(${^DEFAULTS%/}/{zsh-,zsh/}completion/***/(N/))
 		fpath=(${d%/} $fpath)
 	}
 	autoload -Uz compinit
@@ -572,7 +574,7 @@ zsh-mime-setup
 
 
 if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
-	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}/zsh{/zsh-syntax-highlighting,}} \
+	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
 	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
@@ -691,14 +693,14 @@ fi
 
 if (($+functions[auto-fu-init])) || {
 	: # Status must be 0 before sourcing auto-fu.zsh
-	path=(${DEFAULTS:+${^DEFAULTS%/}/zsh{/auto-fu{.zsh,},}} \
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
-		. auto-fu NIL && auto-fu-install
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},} \
+		$path) . auto-fu NIL && auto-fu-install
 	} || {
 	:
-	path=(${DEFAULTS:+${^DEFAULTS%/}/zsh{/auto-fu{.zsh,},}} \
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}) \
-		. auto-fu.zsh NIL
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},} \
+		$path) . auto-fu.zsh NIL
 	}
 then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	setopt no_warn_create_global
