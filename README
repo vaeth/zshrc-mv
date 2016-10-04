@@ -83,13 +83,6 @@ $DEFAULTS/DIR_COLORS
 	existing of $DEFAULTS/DIR_COLORS, ~/.dircolors, or /etc/DIRCOLORS
 	(ignoring the values of $SOLARIZED and $TERM in this case).
 
-$DEFAULTS[/zsh][/set_prompt]/{set_prompt,set_prompt.sh,git_prompt.zsh}
-$GITS[/set_prompt[.git]]/{set_prompt,set_prompt.sh,git_prompt.zsh}
-$EPREFIX/usr/bin/{set_prompt,set_prompt.sh,git_prompt.zsh}
-	These override the corresponding files from $PATH if available.
-	Download e.g. with
-	git clone https://github.com/vaeth/set_prompt.git
-	or (as a gentoo user) install from the mv overlay.
 
 $DEFAULTS[/zsh][auto-fu[.zsh]]/auto-fu[.zsh]
 $GITS[/auto-fu[.zsh][.git]]/auto-fu[.zsh]
@@ -106,3 +99,11 @@ $EPREFIX/usr/share/zsh/site-contrib[/auto-fu[.zsh]]
 	if available. Fallback is to use PATH. Download e.g. with
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
 	or (as a gentoo user) install from the mv overlay.
+
+The variables DEFAULTS, GIT, and EPREFIX are not honoured for support for
+runtitle and set_prompt (earlier versions of zshrc-mv had some mixture here).
+To get support for these (which is recommended) download them with
+	git clone https://github.com/vaeth/runtitle.git
+	git clone https://github.com/vaeth/set_prompt.git
+or (as a gentoo user) install them from the mv overlay
+and make sure to have the corresponding directories in your $PATH

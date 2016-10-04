@@ -115,21 +115,12 @@ autoload -Uz colors zargs zcalc zed zmv
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
-() {
-	local -a path
-	path=(
-		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/set_prompt,}}
-		${GITS:+${^GITS%/}{set_prompt{.git,},}} \
-		${EPREFIX+:${EPREFIX%/}/usr/bin}
-		$path
-	)
-	if command -v set_prompt NIL
-	then	setopt local_options no_warn_create_global
-		(($+functions[set_prompt])) || . set_prompt.sh NIL && {
-			set_prompt -r
-			. git_prompt.zsh NIL
-		}
-	fi
+(($+commands[set_prompt])) && () {
+	setopt local_options no_warn_create_global
+	(($+functions[set_prompt])) || . set_prompt.sh NIL && {
+		set_prompt -r
+		. git_prompt.zsh NIL
+	}
 }
 
 
