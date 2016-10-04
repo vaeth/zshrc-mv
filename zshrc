@@ -5,8 +5,11 @@
 #
 # When sourcing this file, you should have set PATH and also
 #   interactive=/path/to/bashrc_file_for_interactive_mode
-#   DEFAULTS=/path/to/local/configuration/files
-# if you want to make use of the corresponding features.
+#   DEFAULTS=(/paths/to/dirs-with-local-configuration-files)
+#   GITS=(/paths/to/dirs-with-local-git-packages)
+#   EPREFIX=(/root-directories)
+#   (the arrays can be also single strings)
+# if you want to make use of the corresponding features;
 # See the README file in this folder for more details.
 
 export SHELL=/bin/zsh
@@ -31,8 +34,11 @@ alias -g 'NIL'='>&/dev/null'
 
 have_term() {
 	local i
-	for i in ${TERMINFO-} ~/.terminfo ${TERMINFO_DIRS-} \
-		/usr/{,share/}{,lib/}terminfo /{etc,lib}/terminfo
+	for i in ${TERMINFO-} ${TERMINFO_DIRS-} ${HOME:+"$HOME/.terminfo"} \
+		${EPREFIX:+${^EPREFIX%/}/usr/{,share/}{,lib/}terminfo} \
+		${EPREFIX:+${^EPREFIX%/}/{etc,lib}/terminfo} \
+		/usr/{,share/}{,lib/}terminfo \
+		/{etc,lib}/terminfo
 	do	! [[ -z $i || ! -d $i ]] && \
 		[[ -r $i/${1:0:1}/$1 || -r $i/$1 ]] && return
 	done
@@ -106,18 +112,24 @@ zmodload zsh/zutil
 autoload -Uz colors zargs zcalc zed zmv
 #colors
 
+
 # Activate the prompt from https://github.com/vaeth/set_prompt/
 
-(($+commands[set_prompt])) && () {
-	setopt local_options no_warn_create_global
-	(($+functions[set_prompt])) || \
-		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
-			$path) . set_prompt.sh \
-	&& {
-		set_prompt -r
-		path=(${DEFAULTS:+${^DEFAULTS%/}{/zsh,}{/set_prompt,}} \
-			$path) . git_prompt.zsh
-	}
+() {
+	local -a path
+	path=(
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/set_prompt,}}
+		${GITS:+${^GITS%/}{set_prompt{.git,},}} \
+		${EPREFIX+:${EPREFIX%/}/usr/bin}
+		$path
+	)
+	if command -v set_prompt NIL
+	then	setopt local_options no_warn_create_global
+		(($+functions[set_prompt])) || . set_prompt.sh NIL && {
+			set_prompt -r
+			. git_prompt.zsh NIL
+		}
+	fi
 }
 
 
@@ -138,11 +150,12 @@ autoload -Uz colors zargs zcalc zed zmv
 	add-zsh-hook preexec set_title
 }
 
+
 # Initialize the helping system:
 
 for HELPDIR in '' \
 	${DEFAULTS:+{^DEFAULTS%/}{/zsh,}/help} \
-	${EPREFIX:+${EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
+	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
 	'/usr/share/zsh/site-contrib/help'
 do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
 		alias run-help NUL && unalias run-help
@@ -159,17 +172,27 @@ done
 # I recommend https://github.com/vaeth/termcolors-mv/
 # but a fallback is used if the corresponding script is not in path.
 
-[[ -n ${LS_COLORS:++} ]] || {
+[[ -n ${LS_COLORS:++} ]] || ! (($+commands[dircolors])) || {
 	if (($+commands[dircolors-mv]))
-	then	# If DEFAULTS is an array, export only its first word
-		eval "$(DEFAULTS=($DEFAULTS)
-SOLARIZED=$SOLARIZED DEFAULTS=${DEFAULTS[1]} dircolors-mv)"
-	elif (($+commands[dircolors]))
 	then	() {
+		local i e
+		for i in \
+			${DEFAULTS:+{^DEFAULTS%/}/dir{_,}colors} \
+			${GITS:+{^GITS%/}{/termcolors-mv{.git,},}{/etc,}/dir{_,}colors} \
+			${EPREFIX:+${^EPREFIX%/}/etc/dir{_,}colors} \
+			''
+		do	[[ -n $i && -d $i ]] && \
+			e=$(unset DEFAULTS
+SOLARIZED=${SOLARIZED-} DEFAULTS=${i%/*} dircolors-mv) && \
+			[[ -n $e ]] && eval "$e" && break
+		done
+	}
+	else	() {
 		local i
 		for i in \
 			${DEFAULTS:+{^DEFAULTS%/}/DIR_COLORS} \
-			"$HOME/.dircolors" \
+			${HOME:+"$HOME/.dircolors"} \
+			${EPREFIX:+${^EPREFIX%/}/etc/DIR_COLORS} \
 			'/etc/DIR_COLORS'
 		do	[[ -f $i ]] && eval "$(dircolors -- "$i")" && break
 		done
@@ -574,7 +597,10 @@ zsh-mime-setup
 
 
 if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
-	. "$(for i in ${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
+	. "$(for i in \
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
+		${GITS:+${^GITS%/}{zsh-syntax-highlighting{.git,},}} \
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
 	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
@@ -694,12 +720,16 @@ fi
 if (($+functions[auto-fu-init])) || {
 	: # Status must be 0 before sourcing auto-fu.zsh
 	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},} \
+		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
+		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
 		$path) . auto-fu NIL && auto-fu-install
 	} || {
 	:
 	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},} \
+		${GITS:+${^GITS%/}{auto-fu{.zsh,}{.git,},}} \
+		${EPREFIX+:${EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}} \
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
 		$path) . auto-fu.zsh NIL
 	}
 then	# auto-fu.zsh gives confusing messages with warn_create_global:

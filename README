@@ -53,27 +53,29 @@ it is called at the very end of zshrc (passing the arguments of the shell),
 so you can undo/extend any change done in zshrc if you wish to.
 
 Also some other paths are configurable if you have set
-	DEFAULTS=(/paths/to/dirs/with/local/configuration/data)
-	# (as usual in zsh, this can be an array or a variable)
-when you source zshrc. More precisely, if you define DEFAULTS,
-the following files are taken from this location if they exist:
+	DEFAULTS=(/paths/to/dirs-with-local-configuration-files)
+	GITS=(/paths/to/dirs-with-local-git-packages)
+	EPREFIX=(/root-directories)
+	(The arrays can also be single strings)
+when you source zshrc. More precisely, if DEFAULTS, GITS, or EPREFIX are
+defined, then the following files are taken from this location if they exist:
 
-$DEFAULTS{/zsh,}/completion/...
+$DEFAULTS[/zsh]/completion/...
 	This and all its subdirectories can contain local zsh completion files
 
-$DEFAULTS{/zsh,}/help
+$DEFAULTS[/zsh]/help
 	This substitutes /usr/share/zsh/site-contrib/help if available.
 	The content should be generated with the Util/helpfiles script
 	as described in the zsh manpage.
 
+$DEFAULTS/dir[_]colors/*
+$GITS[/termcolors-mv[.git]][/etc]/dir[_]colors/*
 $DEFAULTS/DIR_COLORS
-$DEFAULTS/dir_colors/*
-	By default, zshrc uses dircolors-mv (from termcolors-mv.git) to
-	replace /etc/DIR_COLORS by a directory /etc/dir_colors/*
-	of colorschemes which selects the appropriate scheme by taking
-	the environment variable $TERM and $SOLARIZED into account.
-	The dircolors-mv script also honours $DEFAULTS, but only if it
-	is an (exported) environment variables (and not an array).
+	If dircolors-mv (from termcolors-mv.git) is in $path, then
+	zshrc uses dircolors-mv: This selects the appropriate color
+	scheme by taking the environment variable $TERM and $SOLARIZED
+	into account (and zshrc-mv exports an appropriate DEFAULTS for
+	dircolors-mv, trying first $DEFAULTS/... and then $GITS/...).
 	Download e.g. with
 	git clone https://github.com/vaeth/termcolors-mv.git
 	or (as a gentoo user) install from the mv overlay.
@@ -81,20 +83,26 @@ $DEFAULTS/dir_colors/*
 	existing of $DEFAULTS/DIR_COLORS, ~/.dircolors, or /etc/DIRCOLORS
 	(ignoring the values of $SOLARIZED and $TERM in this case).
 
-$DEFAULTS/{zsh,}{/set_prompt,}/{set_prompt.sh,git-prompt.zsh}
-	These substitute corresponding files in $PATH if available.
+$DEFAULTS[/zsh][/set_prompt]/{set_prompt,set_prompt.sh,git_prompt.zsh}
+$GITS[/set_prompt[.git]]/{set_prompt,set_prompt.sh,git_prompt.zsh}
+$EPREFIX/usr/bin/{set_prompt,set_prompt.sh,git_prompt.zsh}
+	These override the corresponding files from $PATH if available.
 	Download e.g. with
 	git clone https://github.com/vaeth/set_prompt.git
 	or (as a gentoo user) install from the mv overlay.
 
-$DEFAULTS/zsh{/auto-fu{.zsh,},}/auto-fu{,.zsh}
+$DEFAULTS[/zsh][auto-fu[.zsh]]/auto-fu[.zsh]
+$GITS[/auto-fu[.zsh][.git]]/auto-fu[.zsh]
+$EPREFIX/usr/share/zsh/site-contrib[/auto-fu[.zsh]]/auto-fu[.zsh]
 	This substitutes the corresponding file in /usr/share/zsh/site-contrib
-	if available. Download e.g. with
+	Fallback is to use $PATH. Download e.g. with
 	git clone https://github.com/hchbaw/auto-fu.zsh.git
 	or (as a gentoo user) install from the mv overlay.
 
-$DEFAULTS/zsh/{zsh-syntax-highlighting,}/zsh-syntax-highlighting.zsh
-	Thise substitutes the corresponding file in /usr/share/zsh/site-contrib
-	if available. Download e.g. with
+$DEFAULTS[/zsh][/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh
+$GITS[/zsh-syntax-highlighting[.git]]/zsh-syntax-highlighting.zsh
+$EPREFIX/usr/share/zsh/site-contrib[/auto-fu[.zsh]]
+	This substitutes the corresponding file in /usr/share/zsh/site-contrib
+	if available. Fallback is to use PATH. Download e.g. with
 	git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
 	or (as a gentoo user) install from the mv overlay.
