@@ -60,11 +60,16 @@ Also some other paths are configurable if you have set
 when you source zshrc. More precisely, if DEFAULTS, GITS, or EPREFIX are
 defined, then the following files are taken from this location if they exist:
 
-$DEFAULTS[/zsh]/completion/...
+$DEFAULTS/zsh-completion/*
+$DEFAULTS/zsh/completion/*
 	This and all its subdirectories can contain local zsh completion files
 
-$DEFAULTS[/zsh]/help
-	This substitutes /usr/share/zsh/site-contrib/help if available.
+$DEFAULTS/zsh-help
+$DEFAULTS/zsh/help
+$EPREFIX/usr/share/zsh/$ZSH_VERSION/help
+$EPREFIX/usr/share/zsh/site-contrib/help
+	This substitutes /usr/share/zsh/$ZSH_VERSION/help or
+	/usr/share/size-contrib/help.
 	The content should be generated with the Util/helpfiles script
 	as described in the zsh manpage.
 

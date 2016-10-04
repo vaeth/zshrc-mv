@@ -144,11 +144,13 @@ autoload -Uz colors zargs zcalc zed zmv
 
 # Initialize the helping system:
 
-for HELPDIR in '' \
-	${DEFAULTS:+{^DEFAULTS%/}{/zsh,}/help} \
+for HELPDIR in \
+	${DEFAULTS:+${^DEFAULTS%/}/zsh{-,/}help} \
 	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
-	'/usr/share/zsh/site-contrib/help'
-do	[[ -d ${HELPDIR:-/usr/share/zsh/$ZSH_VERSION/help} ]] && {
+	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib/help} \
+	/usr/share/zsh/$ZSH_VERSION/help \
+	/usr/share/zsh/site-contrib/help
+do	[[ -d $HELPDIR ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
 		alias help=run-help
@@ -166,26 +168,28 @@ done
 [[ -n ${LS_COLORS:++} ]] || ! (($+commands[dircolors])) || {
 	if (($+commands[dircolors-mv]))
 	then	() {
+		setopt local_options no_warn_create_global
 		local i e
 		for i in \
-			${DEFAULTS:+{^DEFAULTS%/}/dir{_,}colors} \
-			${GITS:+{^GITS%/}{/termcolors-mv{.git,},}{/etc,}/dir{_,}colors} \
+			${DEFAULTS:+${^DEFAULTS%/}/dir{_,}colors} \
+			${GITS:+${^GITS%/}{/termcolors-mv{.git,},}{/etc,}/dir{_,}colors} \
 			${EPREFIX:+${^EPREFIX%/}/etc/dir{_,}colors} \
 			''
-		do	[[ -n $i && -d $i ]] && \
-			e=$(unset DEFAULTS
+		do	[[ -z $i || -d $i ]] && e=$(unset DEFAULTS
 SOLARIZED=${SOLARIZED-} DEFAULTS=${i%/*} dircolors-mv) && \
 			[[ -n $e ]] && eval "$e" && break
 		done
 	}
 	else	() {
-		local i
+		setopt local_options no_warn_create_global
+		local i e
 		for i in \
-			${DEFAULTS:+{^DEFAULTS%/}/DIR_COLORS} \
+			${DEFAULTS:+${^DEFAULTS%/}/DIR_COLORS} \
 			${HOME:+"$HOME/.dircolors"} \
 			${EPREFIX:+${^EPREFIX%/}/etc/DIR_COLORS} \
-			'/etc/DIR_COLORS'
-		do	[[ -f $i ]] && eval "$(dircolors -- "$i")" && break
+			/etc/DIR_COLORS
+		do	[[ -f $i ]] && e=$(dircolors -- "$i") && \
+			[[ -n $e ]] && eval "$e" && break
 		done
 	}
 	fi
@@ -242,7 +246,7 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 (($+functions[compinit])) || {
 	[[ -n ${DEFAULTS++} ]] && () {
 		local -a d
-		d=(${^DEFAULTS%/}/{zsh-,zsh/}completion/***/(N/))
+		d=(${^DEFAULTS%/}/zsh{-,/}completion/***/(N/))
 		fpath=(${d%/} $fpath)
 	}
 	autoload -Uz compinit
@@ -590,7 +594,7 @@ zsh-mime-setup
 if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
 	. "$(for i in \
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
-		${GITS:+${^GITS%/}{zsh-syntax-highlighting{.git,},}} \
+		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}} \
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}} \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
