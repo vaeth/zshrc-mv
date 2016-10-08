@@ -244,9 +244,12 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 
 # Initialize the completion system
 (($+functions[compinit])) || {
-	[[ -n ${DEFAULTS++} ]] && () {
+	[[ -z ${DEFAULTS:++}${GITS:++} ]] || () {
 		local -a d
-		d=(${^DEFAULTS%/}/zsh{-,/}completion/***/(N/))
+		d=(
+			${DEFAULTS:+${^DEFAULTS%/}/zsh{-,/}completion/***/(N/)}
+			${GITS:+${^GITS%/}/***/zsh(N/)}
+		)
 		fpath=(${d%/} $fpath)
 	}
 	autoload -Uz compinit
@@ -259,6 +262,8 @@ compdef _my_cd cd
 
 # mtools completion can hang, so we eliminate it:
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
+
+(($+commands[sshrc])) && compdef sshrc=ssh
 
 # Some private shell functions or wrapper scripts behave like other commands:
 (($+functions[mcd])) && compdef mcd=cd
@@ -396,7 +401,7 @@ done
 # Wrapper function for bindkey: multiple keys, $'$...' refers to terminfo;
 # - means -M menuselect
 
-Aa() {
+zshrc_bindkey() {
 	local b c
 	local -a a
 	if [[ ${1-} == - ]]
@@ -420,19 +425,19 @@ Aa() {
 
 # Line editing during completion (man zshmodules: zsh/complist)
 
-Aa - accept-and-infer-next-history Return
-Aa - accept-and-hold Meta-Return $'\M-\C-m' $'\C-Í' \
+zshrc_bindkey - accept-and-infer-next-history Return
+zshrc_bindkey - accept-and-hold Meta-Return $'\M-\C-m' $'\C-Í' \
 	Escape-Return Shift-Return Ctrl-Return AltGr-Return \
 	Escape-Space Meta-Space Ctrl-Space \
 	Ctrl-Plus
-Aa - undo BackSpace $'\C-?' $'\C-H' \
+zshrc_bindkey - undo BackSpace $'\C-?' $'\C-H' \
 	Ctrl-Dot Meta-Dot
-Aa - send-break Escape Ctrl-c
-Aa - backward-word PageUp  $'\e[5~'
-Aa - forward-word PageDown $'\e[6~'
-Aa - history-incremental-search-forward Ctrl-l
-Aa - vi-insert Insert $'\e[2~'
-Aa - vi-insert Shift-Insert
+zshrc_bindkey - send-break Escape Ctrl-c
+zshrc_bindkey - backward-word PageUp  $'\e[5~'
+zshrc_bindkey - forward-word PageDown $'\e[6~'
+zshrc_bindkey - history-incremental-search-forward Ctrl-l
+zshrc_bindkey - vi-insert Insert $'\e[2~'
+zshrc_bindkey - vi-insert Shift-Insert
 
 
 # Line editing (man zshzle)
@@ -453,62 +458,64 @@ kill-line-maybe() {
 zle -N kill-line-maybe
 
 bindkey -e
-Aa history-beginning-search-backward Up $'\e[A'
-Aa history-beginning-search-forward Down $'\e[B'
-Aa up-line-or-history Ctrl-Up $'\e[[[cu'
-Aa down-line-or-history Ctrl-Down $'\e[[[cd'
-Aa up-line-or-history Meta-Up $'\C-aap' $'\e[[[au'
-Aa down-line-or-history Meta-Down $'\C-aan' $'\e[[[ad'
-Aa up-line-or-history Shift-Up $'\e[[[su'
-Aa down-line-or-history Shift-Down $'\e[[[sd'
-Aa beginning-of-history AltGr-Up
-Aa end-of-history AltGr-Down
-Aa up-line-or-history PageUp $'\e[5~'
-Aa down-line-or-history PageDown $'\e[6~'
-Aa beginning-of-history Meta-PageDown $'\M-\e[5~'
-Aa end-of-history Meta-PageUp $'\M-\e[6~'
-Aa beginning-of-history Ctrl-PageUp $'\e[5;5~'
-Aa end-of-history Ctrl-PageDown $'\e[6;5~'
-Aa backward-char Left $'\e[D'
-Aa forward-char Right $'\e[C'
-Aa backward-word Ctrl-Left $'\e[1;5D' $'\e[[[cl'
-Aa forward-word Ctrl-Right $'\e[[[cr' $'\e[1;5C'
-Aa delete-char Delete $'\e[3~'
-Aa kill-line-maybe Ctrl-Delete
-Aa overwrite-mode Insert $'\e[2~' \
+zshrc_bindkey history-beginning-search-backward Up $'\e[A'
+zshrc_bindkey history-beginning-search-forward Down $'\e[B'
+zshrc_bindkey up-line-or-history Ctrl-Up $'\e[[[cu'
+zshrc_bindkey down-line-or-history Ctrl-Down $'\e[[[cd'
+zshrc_bindkey up-line-or-history Meta-Up $'\C-aap' $'\e[[[au'
+zshrc_bindkey down-line-or-history Meta-Down $'\C-aan' $'\e[[[ad'
+zshrc_bindkey up-line-or-history Shift-Up $'\e[[[su'
+zshrc_bindkey down-line-or-history Shift-Down $'\e[[[sd'
+zshrc_bindkey beginning-of-history AltGr-Up
+zshrc_bindkey end-of-history AltGr-Down
+zshrc_bindkey up-line-or-history PageUp $'\e[5~'
+zshrc_bindkey down-line-or-history PageDown $'\e[6~'
+zshrc_bindkey beginning-of-history Meta-PageDown $'\M-\e[5~'
+zshrc_bindkey end-of-history Meta-PageUp $'\M-\e[6~'
+zshrc_bindkey beginning-of-history Ctrl-PageUp $'\e[5;5~'
+zshrc_bindkey end-of-history Ctrl-PageDown $'\e[6;5~'
+zshrc_bindkey backward-char Left $'\e[D'
+zshrc_bindkey forward-char Right $'\e[C'
+zshrc_bindkey backward-word Ctrl-Left $'\e[1;5D' $'\e[[[cl'
+zshrc_bindkey forward-word Ctrl-Right $'\e[[[cr' $'\e[1;5C'
+zshrc_bindkey delete-char Delete $'\e[3~'
+zshrc_bindkey kill-line-maybe Ctrl-Delete
+zshrc_bindkey overwrite-mode Insert $'\e[2~' \
 	Shift-Insert
-Aa beginning-of-line Home $'\e[1~' $'\e[H'
-Aa end-of-line End $'\e[4~' $'\e[F'
-Aa clear-screen Shift-Home $'\e[[[sH'
-Aa backward-delete-char BackSpace $'\C-?' $'\C-H'
-Aa backward-kill-line AltGr-BackSpace
-Aa kill-line-maybe Ctrl-BackSpace Shift-BackSpace
-Aa insert-completions Shift-Return Ctrl-Return
-Aa call-last-kbd-macro AltGr-Return
-Aa pound-insert Meta-Return $'\M-\C-m' $'\C-Í'
-Aa push-input Escape-Return
-Aa describe-key-briefly F10
-Aa describe-key-briefly Shift-F10
-Aa describe-key-briefly AltGr-F10
-Aa pound-insert Meta-Hash '£'
-Aa all-matches Escape-Tab Escape-Star Escape-Plus Meta-Plus Meta-Shift-Star
-Aa undo Escape-u Meta-u
-Aa insert-files Ctrl-f
-Aa predict-off Ctrl-g
-Aa predict-on Ctrl-e
-Aa kill-whole-line Ctrl-y Ctrl-x
-Aa kill-line-maybe Ctrl-d
-Aa yank Ctrl-v
-Aa quoted-insert Ctrl-t
+zshrc_bindkey beginning-of-line Home $'\e[1~' $'\e[H'
+zshrc_bindkey end-of-line End $'\e[4~' $'\e[F'
+zshrc_bindkey clear-screen Shift-Home $'\e[[[sH'
+zshrc_bindkey backward-delete-char BackSpace $'\C-?' $'\C-H'
+zshrc_bindkey backward-kill-line AltGr-BackSpace
+zshrc_bindkey kill-line-maybe Ctrl-BackSpace Shift-BackSpace
+zshrc_bindkey insert-completions Shift-Return Ctrl-Return
+zshrc_bindkey call-last-kbd-macro AltGr-Return
+zshrc_bindkey pound-insert Meta-Return $'\M-\C-m' $'\C-Í'
+zshrc_bindkey push-input Escape-Return
+zshrc_bindkey describe-key-briefly F10
+zshrc_bindkey describe-key-briefly Shift-F10
+zshrc_bindkey describe-key-briefly AltGr-F10
+zshrc_bindkey pound-insert Meta-Hash '£'
+zshrc_bindkey all-matches Escape-Tab Escape-Star Escape-Plus Meta-Plus Meta-Shift-Star
+zshrc_bindkey undo Escape-u Meta-u
+zshrc_bindkey insert-files Ctrl-f
+zshrc_bindkey predict-off Ctrl-g
+zshrc_bindkey predict-on Ctrl-e
+zshrc_bindkey kill-whole-line Ctrl-y Ctrl-x
+zshrc_bindkey kill-line-maybe Ctrl-d
+zshrc_bindkey yank Ctrl-v
+zshrc_bindkey quoted-insert Ctrl-t
 
 
 # Make files with certain extensions "executable" (man zshbuiltins#alias)
 # Actually, we use zsh-mime-setup to this purpose.
 
 # First store typical programs in variables (can be changed later)
-# A leading - sign means that also ..._flags=needsterminal is set
+# Usage: zshrc_mimevar varname program program ...
+# The first existing program is chosen. A leading - sign in the program name
+# means that also varname_flags=needsterminal is set; otherwise it is removed
 
-Aa() {
+zshrc_mimevar() {
 	[[ -z ${(P)1-} ]] || {
 		eval "typeset -g ${1}_flags=\${${1}_flags-}"
 		return
@@ -523,55 +530,72 @@ Aa() {
 	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal || \
 		typeset -g ${j}_flags=
 }
-Aa XFIG xfig
-Aa BROWSER pick-web-browser
-Aa SOUNDPLAYER -mplayer -mpv -mplayer2
-Aa MOVIEPLAYER -mplayer -mpv -mplayer2 smplayer smplayer2 xine-ui kaffeine vlc false
-Aa EDITOR -e emacs -vim -vi
-Aa DVIVIEWER xdvi kdvi okular evince
-Aa PDFVIEWER qpdfview mupdf okular evince zathura apvlv acroread
-Aa DJVREADER djview djview4 okular evince
-Aa EPUBREADER fbreader calibre firefox
-Aa MOBIREADER fbreader calibre
-Aa LITREADER calibre
-Aa VIEWER {p,}qiv feh kquickshow gwenview eog xv {gimage,gq,qpic}view viewnior
-Aa PSVIEWER {,g}gv
-Aa OFFICE {libre,o,s}office
 
-# Now we associate extensions to the above programs
+# Then associate extensions to the above variables
+# Usage: zshrc_mimdedef varname extension extension ...
 
-Aa() {
+zshrc_mimedef() {
 	local i j=\$$1 k=${1}_flags
 	shift
 	for i
 	do	zstyle ":mime:.$i:*" handler $j %s
-		zstyle ":mime:.${(U)i}:*" handler $j %s
 		zstyle ":mime:.$i:*" flags ${(P)k}
+		zstyle ":mime:.${(U)i}:*" handler $j %s
 		zstyle ":mime:.${(U)i}:*" flags ${(P)k}
 	done
 }
-Aa PSVIEWER {,e}ps
-Aa DVIVIEWER dvi
-Aa XFIG {,x}fig
-Aa OFFICE doc
-Aa BROWSER htm{l,} xhtml
-Aa PDFVIEWER pdf
-Aa DJVREADER djv{u,}
-Aa EPUBREADER epub
-Aa MOBIREADER mobi prc
-Aa LITREADER lit
-Aa EDITOR txt text {read,}me 1st now {i,}nfo diz \
+
+zshrc_mimevar XFIG xfig
+zshrc_mimedef XFIG {,x}fig
+
+zshrc_mimevar BROWSER pick-web-browser
+zshrc_mimedef BROWSER htm{l,} xhtml
+
+zshrc_mimevar SOUNDPLAYER -mplayer -mpv -mplayer2
+zshrc_mimedef SOUNDPLAYER au mp3 ogg flac aac mpc mid{i,} cmf cms xmi voc wav \
+	mod stm rol snd wrk mff smp al{g,2} nst med wow 669 s3m oct okt far mtm
+
+zshrc_mimevar MOVIEPLAYER -mplayer -mpv -mplayer2 smplayer smplayer2 xine-ui \
+	kaffeine vlc false
+zshrc_mimedef MOVIEPLAYER mp{g,eg} m2v avi flv mkv ogm mp4{,v} m4v mov qt wmv \
+	asf rm{,vb} flc fli gl dl swf 3gp vob web webm
+
+zshrc_mimevar EDITOR -e emacs -vim -vi
+zshrc_mimedef EDITOR txt text {read,}me 1st now {i,}nfo diz \
 	tex bib sty cls {d,l}tx ins clo fd{d,} \
 	{b,i}st el mf \
 	c{,c,pp,++} h{,pp,++} s{,rc} asm pas pyt for y \
 	diff patch
-Aa SOUNDPLAYER au mp3 ogg flac aac mpc mid{i,} cmf cms xmi voc wav mod \
-	stm rol snd wrk mff smp al{g,2} nst med wow 669 s3m oct okt far mtm
-Aa VIEWER gif pcx bmp {p,m}ng xcf xwd cpi tga tif{f,} img pi{1,2,3,c} \
-	p{n,g,c}m {b,x}bm xpm jp{g,e,eg} iff art wpg rle
-Aa MOVIEPLAYER mp{g,eg} m2v avi flv mkv ogm mp4{,v} m4v mov qt wmv asf \
-	rm{,vb} flc fli gl dl swf 3gp vob web webm
-unset -f Aa
+
+zshrc_mimevar DVIVIEWER xdvi kdvi okular evince
+zshrc_mimedef DVIVIEWER dvi
+
+zshrc_mimevar PDFVIEWER qpdfview mupdf okular evince zathura apvlv acroread
+zshrc_mimedef PDFVIEWER pdf
+
+zshrc_mimevar DJVREADER djview djview4 okular evince
+zshrc_mimedef DJVREADER djv{u,}
+
+zshrc_mimevar EPUBREADER fbreader calibre firefox
+zshrc_mimedef EPUBREADER epub
+
+zshrc_mimevar MOBIREADER fbreader calibre
+zshrc_mimedef MOBIREADER mobi prc
+
+zshrc_mimevar LITREADER calibre
+zshrc_mimedef LITREADER lit
+
+zshrc_mimevar VIEWER {p,}qiv feh kquickshow gwenview eog xv \
+	{gimage,gq,qpic}view viewnior
+zshrc_mimedef VIEWER gif pcx bmp {p,m}ng xcf xwd cpi tga tif{f,} img \
+	pi{1,2,3,c} p{n,g,c}m {b,x}bm xpm jp{g,e,eg} iff art wpg rle
+
+zshrc_mimevar PSVIEWER {,g}gv
+zshrc_mimedef PSVIEWER {,e}ps
+
+zshrc_mimevar OFFICE {libre,o,s}office
+zshrc_mimedef OFFICE doc
+
 
 # For other extensions, we use the defaults of zsh-mime-setup
 
@@ -714,16 +738,16 @@ fi
 
 if (($+functions[auto-fu-init])) || {
 	: # Status must be 0 before sourcing auto-fu.zsh
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
 		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
-		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}} \
+		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
 		$path) . auto-fu NIL && auto-fu-install
 	} || {
 	:
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}} \
-		${GITS:+${^GITS%/}{auto-fu{.zsh,}{.git,},}} \
-		${EPREFIX+:${EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}} \
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
+		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
+		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
 		$path) . auto-fu.zsh NIL
 	}
@@ -762,4 +786,9 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
 fi
 
+# Source user functions
 ! (($+functions[after_zshrc])) || after_zshrc "$@"
+
+# Free unused memory unless the user explicitly sets ZSHRC_KEEP_FUNCTIONS
+[[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || \
+	unset -f zshrc_bindkey zshrc_mimevar zshrc_mimedef
