@@ -260,6 +260,15 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 _my_cd() CDPATH= _cd "$@"
 compdef _my_cd cd
 
+# Extend PATH for completion for programs of sudo type:
+() {
+	local i
+	for i in sudo sudox su sux
+	do	eval '_my_'$i'() path=($path /sbin /usr/sbin) _'$i' "$@"
+compdef _my_'"$i $i"
+	done
+}
+
 # mtools completion can hang, so we eliminate it:
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
