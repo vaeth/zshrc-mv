@@ -242,6 +242,14 @@ zstyle ':completion:all-matches:*' completer _all_matches
 # Restrict cd selections:
 zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-directories path-directories
 
+# Add a special SUDO_PATH for completion of sudo & friends:
+[[ $UID -eq 0 ]] || () {
+	local -T SUDO_PATH sudo_path
+	local -U sudo_path
+	sudo_path=($path {,/usr{,/local}}/sbin(N-/))
+	zstyle ":completion:*:(su|sudo|sux|sudox):*" environ PATH="$SUDO_PATH"
+}
+
 # Initialize the completion system
 (($+functions[compinit])) || {
 	[[ -z ${DEFAULTS:++}${GITS:++} ]] || () {
@@ -260,15 +268,6 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 _my_cd() CDPATH= _cd "$@"
 compdef _my_cd cd
 
-# Extend PATH for completion for programs of sudo type:
-() {
-	local i
-	for i in sudo sudox su sux
-	do	eval '_my_'$i'() path=($path /sbin /usr/sbin) _'$i' "$@"
-compdef _my_'"$i $i"
-	done
-}
-
 # mtools completion can hang, so we eliminate it:
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
 
@@ -277,7 +276,6 @@ compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mm
 # Some private shell functions or wrapper scripts behave like other commands:
 (($+functions[mcd])) && compdef mcd=cd
 whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
-whence ssudox NUL && compdef ssudox=sudox
 () {
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
@@ -641,8 +639,6 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 #		cursor		# color cursor; useless with cursorColor
 #		root		# color if you are root; broken in some versions
 	)
-	typeset -gUa ZSH_ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS
-	ZSH_HIGHLIGHT_TOKENS_PRECOMMANDS=(sudo fakeroot fakeroot-ng)
 	typeset -ga ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES
 	typeset -gA ZSH_HIGHLIGHT_STYLES
 	if [[ $(echotc Co) -ge 256 ]]
