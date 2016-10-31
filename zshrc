@@ -113,13 +113,13 @@ autoload -Uz colors zargs zcalc zed zmv
 #colors
 
 
-# Activate the prompt from https://github.com/vaeth/set_prompt/
+# Activate the prompt from https://github.com/vaeth/set_prompt/ (v3.0.0 or newer)
 
-(($+commands[set_prompt])) && () {
+(($+commands[set_prompt.sh])) && () {
 	setopt local_options no_warn_create_global
 	(($+functions[set_prompt])) || . set_prompt.sh NIL && {
 		set_prompt -r
-		. git_prompt.zsh NIL
+		(($+commands[git_prompt.zsh])) && . git_prompt.zsh NIL
 	}
 }
 
