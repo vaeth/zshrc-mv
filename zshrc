@@ -30,6 +30,10 @@ alias -g 'NUL'='>/dev/null'
 alias -g 'NULL'='NUL'
 alias -g 'NIL'='>&/dev/null'
 
+# Make noglob not work like "command" but expand aliases:
+
+alias 'noglob'='noglob '
+
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
 have_term() {
@@ -287,7 +291,7 @@ whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
 	for i in emerge.{wrapper,noprotect}
 	do	whence $i NUL && compdef $i=emerge && alias $i="noglob $i"
 	done
-	for i in emerge squashmount squash_dir
+	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
 	do	whence $i NUL && alias $i="noglob $i"
 	done
 	for i in rsync{,p}{,i}{,.bare}.wrapper
