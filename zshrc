@@ -34,6 +34,26 @@ alias -g 'NIL'='>&/dev/null'
 
 alias 'noglob'='noglob '
 
+unsetopt_nomatch() {
+	if unsetopt | grep -q nonomatch
+	then	restore_nomatch() setopt nomatch
+	else	restore_nomatch() :
+	fi
+	unsetopt nomatch
+}
+noexpand_restore_nomatch() {
+{
+() {
+	setopt local_options no_nullglob no_cshnullglob
+	${~@}
+} $@
+} always {
+	restore_nomatch
+	unfunction restore_nomatch
+}
+}
+alias noexpand='unsetopt_nomatch && noglob noexpand_restore_nomatch '
+
 # Force 256 colors on terminals which typically set an inappropriate TERM:
 
 have_term() {
@@ -72,7 +92,7 @@ setopt path_dirs auto_name_dirs bash_auto_list prompt_subst no_beep
 setopt no_list_ambiguous list_packed
 setopt hist_ignore_all_dups hist_reduce_blanks hist_verify no_hist_expand
 setopt extended_glob hist_subst_pattern
-setopt no_glob_dots no_nomatch no_null_glob numeric_glob_sort no_sh_glob
+setopt no_glob_dots nomatch no_null_glob numeric_glob_sort no_sh_glob
 setopt mail_warning interactive_comments no_clobber
 setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
 setopt warn_create_global
@@ -268,6 +288,10 @@ zstyle ':completion:*:cd:*' tag-order local-directories # directory-stack named-
 	compinit -D # -u -C
 }
 
+# Make the above aliases/functions work with the completion system:
+compdef _precommand noexpand_restore_nomatch
+compdef _precommand noglob
+
 # Results from CDPATH usually produce confusing completions of cd:
 _my_cd() CDPATH= _cd "$@"
 compdef _my_cd cd
@@ -284,15 +308,15 @@ whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
 	do	for j in $i.{32,64}
-		do	whence $j NUL && compdef $j=$i && alias $j="noglob $j"
+		do	whence $j NUL && compdef $j=$i && alias $j="noexpand $j"
 		done
-		whence $i NUL && alias $i="noglob $i"
+		whence $i NUL && alias $i="noexpand $i"
 	done
-	for i in emerge.{wrapper,noprotect}
-	do	whence $i NUL && compdef $i=emerge && alias $i="noglob $i"
+	for i in emerge.{binpkg,noprotect}
+	do	whence $i NUL && compdef $i=emerge && alias $i="noexpand $i"
 	done
 	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
-	do	whence $i NUL && alias $i="noglob $i"
+	do	whence $i NUL && alias $i="noexpand $i"
 	done
 	for i in rsync{,p}{,i}{,.bare}.wrapper
 	do	whence $i NUL && compdef $i=rsync
@@ -800,4 +824,4 @@ fi
 
 # Free unused memory unless the user explicitly sets ZSHRC_KEEP_FUNCTIONS
 [[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || \
-	unset -f zshrc_bindkey zshrc_mimevar zshrc_mimedef
+	unfunction zshrc_bindkey zshrc_mimevar zshrc_mimedef
