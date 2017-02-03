@@ -92,7 +92,7 @@ setopt path_dirs auto_name_dirs bash_auto_list prompt_subst no_beep
 setopt no_list_ambiguous list_packed
 setopt hist_ignore_all_dups hist_reduce_blanks hist_verify no_hist_expand
 setopt extended_glob hist_subst_pattern
-setopt no_glob_dots nomatch no_null_glob numeric_glob_sort no_sh_glob
+setopt no_glob_dots no_nomatch no_null_glob numeric_glob_sort no_sh_glob
 setopt mail_warning interactive_comments no_clobber
 setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
 setopt warn_create_global
@@ -308,15 +308,15 @@ whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
 	do	for j in $i.{32,64}
-		do	whence $j NUL && compdef $j=$i && alias $j="noexpand $j"
+		do	whence $j NUL && compdef $j=$i && alias $j="noglob $j"
 		done
-		whence $i NUL && alias $i="noexpand $i"
+		whence $i NUL && alias $i="noglob $i"
 	done
 	for i in emerge.{binpkg,noprotect}
-	do	whence $i NUL && compdef $i=emerge && alias $i="noexpand $i"
+	do	whence $i NUL && compdef $i=emerge && alias $i="noglob $i"
 	done
 	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
-	do	whence $i NUL && alias $i="noexpand $i"
+	do	whence $i NUL && alias $i="noglob $i"
 	done
 	for i in rsync{,p}{,i}{,.bare}.wrapper
 	do	whence $i NUL && compdef $i=rsync
