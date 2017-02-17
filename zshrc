@@ -533,6 +533,7 @@ zshrc_bindkey describe-key-briefly AltGr-F10
 zshrc_bindkey pound-insert Meta-Hash '£'
 zshrc_bindkey all-matches Escape-Tab Escape-Star Escape-Plus Meta-Plus Meta-Shift-Star
 zshrc_bindkey undo Escape-u Meta-u
+zshrc_bindkey _complete_help Ctrl-w
 zshrc_bindkey insert-files Ctrl-f
 zshrc_bindkey predict-off Ctrl-g
 zshrc_bindkey predict-on Ctrl-e
@@ -814,9 +815,13 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	# Starting a line with a space or tab or quoting the first word
 	# or escaping a word should deactivate auto-fu for that line/word.
 	# This is useful e.g. if auto-fu is too slow for you in some cases.
-	# Unfortunately, for eix auto-fu is always too slow...
-	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*|(emerge|eix(|.32|.64))[[:blank:]]*'
+	zstyle ':auto-fu:var' autoable-function/skiplines '[[:blank:]\\"'\'']*'
 	zstyle ':auto-fu:var' autoable-function/skipwords '[\\]*'
+
+	# Unfortunately, auto-fu is always too slow for portage or eix.
+	# Therefore, we disable package completion with auto-fu:
+	zstyle ':completion:*:*:eix*:*' tag-order options dummy - '!packages'
+	zstyle ':completion:*:*:emerge:argument-rest*' tag-order values available_sets -
 fi
 
 # Source user functions
