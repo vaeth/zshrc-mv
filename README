@@ -56,7 +56,8 @@ Also some other paths are configurable if you have set
 	DEFAULTS=(/paths/to/dirs-with-local-configuration-files)
 	GITS=(/paths/to/dirs-with-local-git-packages)
 	EPREFIX=(/root-directories)
-	(The arrays can also be single strings)
+	(The arrays can also be single strings; note that if you use Gentoo,
+	EPREFIX _must_ be a string)
 when you source zshrc. More precisely, if DEFAULTS, GITS, or EPREFIX are
 defined, then the following files are taken from this location if they exist:
 
