@@ -704,7 +704,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'bracket-error'                 fg=196,bold
 		)
 		case ${SOLARIZED:-n} in
-		([nNfF0-]*|[oO][fF]*)
+		([nNfF]*|[oO][fF]*|0|-)
 			false;;
 		esac && ZSH_HIGHLIGHT_STYLES+=(
 			'default'                       none
