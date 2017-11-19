@@ -10,7 +10,7 @@
 #   EPREFIX=(/root-directories)
 #   (the arrays can be also single strings)
 # if you want to make use of the corresponding features;
-# See the README file in this folder for more details.
+# See the README.md shipped with zshrc-mv for more details.
 
 export SHELL=/bin/zsh
 
