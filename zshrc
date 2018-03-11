@@ -312,8 +312,8 @@ whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
 		done
 		whence $i NUL && alias $i="noglob $i"
 	done
-	for i in emerge.{binpkg,noprotect}
-	do	whence $i NUL && compdef $i=emerge && alias $i="noglob $i"
+	for i in emerge.{binpkg,noprotect} squashmount.chroot
+	do	whence $i NUL && compdef $i=${i%%.*} && alias $i="noglob $i"
 	done
 	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
 	do	whence $i NUL && alias $i="noglob $i"
