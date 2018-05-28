@@ -639,8 +639,10 @@ zstyle ":mime:*" current-shell true
 zsh-mime-setup
 
 
-# Activate syntax highlighting from
+# Activate syntax highlighting from one of
+# https://github.com/zdharma/fast-syntax-highlighting/
 # https://github.com/zsh-users/zsh-syntax-highlighting/
+# If you set ZSH
 #
 # Set colors according to a 256 color scheme if supported.
 # (We assume always a black background since anything else causes headache.)
@@ -650,8 +652,18 @@ zsh-mime-setup
 # XTerm*background:  black
 # XTerm*foreground:  white
 
-
-if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
+zshrc_fast_syntax_highlighting() {
+	. "$(for i in \
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}} \
+		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}} \
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}} \
+		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,} \
+		$path
+	do	j=$i/fast-syntax-highlighting.plugin.zsh && [[ -f $j ]] && echo -nE $j && exit
+	done)" NIL || return
+	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
+}
+zshrc_zsh_syntax_highlighting() {
 	. "$(for i in \
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
 		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}} \
@@ -659,8 +671,8 @@ if ! (($+ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES)) && is-at-least 4.3.9 && \
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
 		$path
 	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
-	done)" NIL
-then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
+	done)" NIL || return
+	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
 #		patterns	# color according to ZSH_HIGHLIGHT_PATTERNS
@@ -668,17 +680,22 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 #		cursor		# color cursor; useless with cursorColor
 #		root		# color if you are root; broken in some versions
 	)
-	typeset -ga ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES
-	typeset -gA ZSH_HIGHLIGHT_STYLES
+	zshrc_highlight_styles \
+		ZSH_HIGHLIGHT_STYLES ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES
+}
+zshrc_highlight_styles() {
+	local -a brackets
+	local -A styles
+	local i
 	if [[ $(echotc Co) -ge 256 ]]
-	then	ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES=(
+	then	brackets=(
 			fg=98,bold
 			fg=135,bold
 			fg=141,bold
 			fg=147,bold
 			fg=153,bold
 		)
-		ZSH_HIGHLIGHT_STYLES=(
+		styles=(
 			'default'                       fg=252
 			'unknown-token'                 fg=64,bold
 			'reserved-word'                 fg=84,bold
@@ -706,7 +723,7 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 		case ${SOLARIZED:-n} in
 		([nNfF]*|[oO][fF]*|0|-)
 			false;;
-		esac && ZSH_HIGHLIGHT_STYLES+=(
+		esac && styles+=(
 			'default'                       none
 			'unknown-token'                 fg=red,bold
 			'reserved-word'                 fg=white
@@ -725,14 +742,14 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'assign'                        fg=cyan
 			'bracket-error'                 fg=red
 		)
-	else	ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES=(
+	else	brackets=(
 			fg=cyan
 			fg=magenta
 			fg=blue,bold
 			fg=red
 			fg=green
 		)
-		ZSH_HIGHLIGHT_STYLES=(
+		styles=(
 			'default'                       none
 			'unknown-token'                 fg=red,bold
 			'reserved-word'                 fg=green,bold
@@ -758,14 +775,24 @@ then	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 			'bracket-error'                 fg=red,bold
 		)
 	fi
-	() {
-		local i
-		for i in {1..5}
-		do	ZSH_HIGHLIGHT_STYLES[bracket-level-$i]=${ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES[$i]}
-		done
-	}
-fi
+	for i in {1..5}
+	do	styles[bracket-level-$i]=${brackets[$i]}
+	done
+	typeset -gA $1
+	set -A $1 ${(kv)styles}
+	if [ $# -ge 2 ]
+	then	typeset -ga $2
+		set -A $2 $brackets
+	fi
+	unfunction zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting zshrc_highlight_styles
+}
 
+if ! (($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) && ! (($+FAST_HIGHLIGHT_STYLES)) && is-at-least 4.3.9
+then	if [[ -n "${ZSHRC_PREFER_ZSH_SYNTAX_HIGHLIGHTING:++}" ]]
+	then	zshrc_zsh_syntax_highlighting || zshrc_fast_syntax_highlighting
+	else	zshrc_fast_syntax_highlighting || zshrc_zsh_syntax_highlighting
+	fi
+fi
 
 # Activate incremental completion, see https://github.com/hchbaw/auto-fu.zsh/
 # (Only the most current versions [branch pu] work with syntax-highlighting)
@@ -829,4 +856,4 @@ fi
 
 # Free unused memory unless the user explicitly sets ZSHRC_KEEP_FUNCTIONS
 [[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || \
-	unfunction zshrc_bindkey zshrc_mimevar zshrc_mimedef
+	unfunction zshrc_bindkey zshrc_mimevar zshrc_mimedef zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting zshrc_highlight_styles

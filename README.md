@@ -12,7 +12,8 @@ In particular, all of
 - command-completion
 - zsh-internal help system
 - https://github.com/hchbaw/auto-fu.zsh/
-- https://github.com/zsh-users/zsh-syntax-highlighting/
+- One of https://github.com/zdharma/fast-syntax-highlighting/
+  or https://github.com/zsh-users/zsh-syntax-highlighting/
 - https://github.com/vaeth/runtitle/
 - https://github.com/vaeth/set_prompt/  (must be v3.0.0 or newer)
 - https://github.com/vaeth/termcolors-mv/
@@ -130,9 +131,21 @@ they exist:
 
 	or (as a gentoo user) install from the mv overlay.
 
+-	`$DEFAULTS[/zsh][/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
+-	`$GITS[/fasth-syntax-highlighting[.git]]/fast-syntax-highlighting.plugin.zsh`
+-	`$EPREFIX/usr/share/zsh/site-contrib/fast-syntax-highlighting.plugin.zsh`
+
+	This substitutes the corresponding file in
+	`/usr/share/zsh/site-contrib` if available.
+	Fallback is to use `$PATH`. Download e.g. with
+
+	`git clone https://github.com/zdharma/fast-syntax-highlighting.git`
+
+	or (as a gentoo user) install from the mv overlay.
+
 -	`$DEFAULTS[/zsh][/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
 -	`$GITS[/zsh-syntax-highlighting[.git]]/zsh-syntax-highlighting.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib[/auto-fu[.zsh]]`
+-	`$EPREFIX/usr/share/zsh/site-contrib/zsh-syntax-highlighting.zsh`
 
 	This substitutes the corresponding file in
 	`/usr/share/zsh/site-contrib` if available.
