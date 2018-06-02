@@ -706,8 +706,8 @@ zshrc_highlight_styles() {
 			'precommand'                    fg=40,bold
 			'hashed-command'                fg=40,bold
 			'path'                          fg=214,bold
-			'path_prefix'                   fg=214,bold
-			'path_approx'                   none
+			'path_prefix'                   fg=202,bold
+			'path_approx'                   fg=202,bold
 			'globbing'                      fg=190,bold
 			'history-expansion'             fg=166,bold
 			'single-hyphen-option'          fg=33,bold
@@ -719,12 +719,30 @@ zshrc_highlight_styles() {
 			'back-double-quoted-argument'   fg=202
 			'assign'                        fg=159,bold
 			'bracket-error'                 fg=196,bold
+			'back-or-dollar-double-quoted-argument' fg=196
+			'assign-array-bracket'          fg=147,bold
+			'back-dollar-quoted-argument'   fg=181,bold
+			'commandseparator'              fg=69,bold
+			'comment'                       fg=162
+			'dollar-quoted-argument'        fg=196
+			'for-loop-number'               fg=140
+			'for-loop-operator'             fg=31,bold
+			'for-loop-separator'            fg=99,bold
+			'for-loop-variable'             fg=208
+			'here-string-tri'               fg=190
+			'here-string-word'              bg=26
+			'matherr'                       fg=196,bold
+			'mathnum'                       fg=140
+			'mathvar'                       fg=208
+			'path_pathseparator'            fg=207
+			'redirection'                   fg=123,bold
+			'suffix-alias'                  fg=84,bold
+			'variable'                      fg=208
 		)
 		case ${SOLARIZED:-n} in
 		([nNfF]*|[oO][fF]*|0|-)
 			false;;
 		esac && styles+=(
-			'default'                       none
 			'unknown-token'                 fg=red,bold
 			'reserved-word'                 fg=white
 			'alias'                         fg=cyan,bold
@@ -735,7 +753,6 @@ zshrc_highlight_styles() {
 			'hashed-command'                fg=green
 			'path'                          fg=yellow
 			'path_prefix'                   fg=yellow
-			'path_approx'                   none
 			'globbing'                      fg=magenta
 			'single-hyphen-option'          fg=green,bold
 			'double-hyphen-option'          fg=magenta,bold
@@ -773,13 +790,32 @@ zshrc_highlight_styles() {
 			'back-double-quoted-argument'   fg=yellow,bg=blue
 			'assign'                        fg=yellow,bold,bg=blue
 			'bracket-error'                 fg=red,bold
+			'back-or-dollar-double-quoted-argument' fg=yellow,bg=blue
+			'assign-array-bracket'          fg=green
+			'back-dollar-quoted-argument'   fg=yellow,bold,bg=blue
+			'commandseparator'              fg=blue,bold
+			'comment'                       fg=black,bold
+			'dollar-quoted-argument'        fg=yellow,bg=blue
+			'for-loop-number'               fg=magenta
+			'for-loop-operator'             fg=yellow
+			'for-loop-separator'            fg=blue,bold
+			'for-loop-variable'             fg=yellow,bold
+			'here-string-tri'               fg=yellow
+			'here-string-word'              bg=blue
+			'matherr'                       fg=red
+			'mathnum'                       fg=magenta
+			'mathvar'                       fg=blue,bold
+			'path_pathseparator'            fg=white,bold
+			'redirection'                   fg=blue,bold
+			'suffix-alias'                  fg=green
+			'variable'                      fg=yellow,bold
 		)
 	fi
 	for i in {1..5}
 	do	styles[bracket-level-$i]=${brackets[$i]}
 	done
 	typeset -gA $1
-	set -A $1 ${(kv)styles}
+	eval $1+=(\${(kv)styles})
 	if [ $# -ge 2 ]
 	then	typeset -ga $2
 		set -A $2 $brackets
