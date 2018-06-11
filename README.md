@@ -12,6 +12,7 @@ In particular, all of
 - command-completion
 - zsh-internal help system
 - https://github.com/hchbaw/auto-fu.zsh/
+- https://github.com/zsh-users/zsh-autosuggestions/
 - One of https://github.com/zdharma/fast-syntax-highlighting/
   or https://github.com/zsh-users/zsh-syntax-highlighting/
 - https://github.com/vaeth/runtitle/
@@ -116,6 +117,17 @@ they exist:
 
 	(ignoring the values of `$SOLARIZED` and `$TERM` in this case).
 
+-	`$DEFAULTS[/zsh][/zsh-autosuggestions]/zsh-autosuggestions.zsh`
+-	`$GITS[/zsh-autosuggestions[.git]]/zsh-autosuggestions.zsh`
+-	`$EPREFIX/usr/share/zsh/site-contrib[/zsh-autosuggestions]/zsh-autosuggestions.zsh`
+
+	This substitutes the corresponding file in
+	`/usr/share/zsh/site-contrib`. Fallback is to use `$PATH`.
+	Download e.g. with
+
+	`git clone https://github.com/zsh-users/zsh-autosuggesitons.git`
+
+	or (as a gentoo user) install from the mv overlay.
 
 -	`$DEFAULTS[/zsh][auto-fu[.zsh]]/auto-fu[.zsh]`
 -	`$GITS[/auto-fu[.zsh][.git]]/auto-fu[.zsh]`
@@ -132,8 +144,8 @@ they exist:
 	or (as a gentoo user) install from the mv overlay.
 
 -	`$DEFAULTS[/zsh][/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
--	`$GITS[/fasth-syntax-highlighting[.git]]/fast-syntax-highlighting.plugin.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib/fast-syntax-highlighting.plugin.zsh`
+-	`$GITS[/fast-syntax-highlighting[.git]]/fast-syntax-highlighting.plugin.zsh`
+-	`$EPREFIX/usr/share/zsh/site-contrib[/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
 
 	This substitutes the corresponding file in
 	`/usr/share/zsh/site-contrib` if available.
@@ -145,7 +157,7 @@ they exist:
 
 -	`$DEFAULTS[/zsh][/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
 -	`$GITS[/zsh-syntax-highlighting[.git]]/zsh-syntax-highlighting.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib/zsh-syntax-highlighting.zsh`
+-	`$EPREFIX/usr/share/zsh/site-contrib[/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
 
 	This substitutes the corresponding file in
 	`/usr/share/zsh/site-contrib` if available.

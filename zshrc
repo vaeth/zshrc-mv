@@ -642,7 +642,6 @@ zsh-mime-setup
 # Activate syntax highlighting from one of
 # https://github.com/zdharma/fast-syntax-highlighting/
 # https://github.com/zsh-users/zsh-syntax-highlighting/
-# If you set ZSH
 #
 # Set colors according to a 256 color scheme if supported.
 # (We assume always a black background since anything else causes headache.)
@@ -653,25 +652,19 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 zshrc_fast_syntax_highlighting() {
-	. "$(for i in \
-		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}} \
-		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}} \
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}} \
-		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,} \
-		$path
-	do	j=$i/fast-syntax-highlighting.plugin.zsh && [[ -f $j ]] && echo -nE $j && exit
-	done)" NIL || return
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
+		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}}
+		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}
+		$path) . fast-syntax-highlighting.plugin.zsh NIL || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
 }
 zshrc_zsh_syntax_highlighting() {
-	. "$(for i in \
-		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}} \
-		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}} \
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}} \
-		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,} \
-		$path
-	do	j=$i/zsh-syntax-highlighting.zsh && [[ -f $j ]] && echo -nE $j && exit
-	done)" NIL || return
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
+		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}}
+		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}
+		$path) . zsh-syntax-highlighting.zsh NIL || return
 	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
@@ -723,7 +716,7 @@ zshrc_highlight_styles() {
 			'assign-array-bracket'          fg=147,bold
 			'back-dollar-quoted-argument'   fg=181,bold
 			'commandseparator'              fg=69,bold
-			'comment'                       fg=162
+			'comment'                       fg=177,bold
 			'dollar-quoted-argument'        fg=196
 			'for-loop-number'               fg=140
 			'for-loop-operator'             fg=31,bold
@@ -885,6 +878,17 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	# Therefore, we disable package completion with auto-fu:
 	zstyle ':completion:*:*:eix*:*' tag-order options dummy - '!packages'
 	zstyle ':completion:*:*:emerge:argument-rest*' tag-order values available_sets -
+fi
+
+# Activate autosuggestions from
+# https://github.com/zsh-users/zsh-syntax-highlighting/
+
+if ! (($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) && is-at-least 4.3.11
+then	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
+		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
+		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
+		$path) . zsh-autosuggestions.zsh NIL
 fi
 
 # Source user functions
