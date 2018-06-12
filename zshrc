@@ -118,7 +118,7 @@ ttyctl -f
 # History
 
 SAVEHIST=${HISTSIZE:-1000}
-unset HISTORYFILE
+unset HISTFILE
 
 DIRSTACKSIZE=100
 
@@ -723,7 +723,7 @@ zshrc_highlight_styles() {
 			'for-loop-separator'            fg=99,bold
 			'for-loop-variable'             fg=208
 			'here-string-tri'               fg=190
-			'here-string-word'              bg=26
+			'here-string-word'              fg=225
 			'matherr'                       fg=196,bold
 			'mathnum'                       fg=140
 			'mathvar'                       fg=208
