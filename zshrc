@@ -515,8 +515,7 @@ zshrc_bindkey backward-word Ctrl-Left $'\e[1;5D' $'\e[[[cl'
 zshrc_bindkey forward-word Ctrl-Right $'\e[[[cr' $'\e[1;5C'
 zshrc_bindkey delete-char Delete $'\e[3~'
 zshrc_bindkey kill-line-maybe Ctrl-Delete
-zshrc_bindkey overwrite-mode Insert $'\e[2~' \
-	Shift-Insert
+zshrc_bindkey overwrite-mode Insert $'\e[2~' Shift-Insert
 zshrc_bindkey beginning-of-line Home $'\e[1~' $'\e[H'
 zshrc_bindkey end-of-line End $'\e[4~' $'\e[F'
 zshrc_bindkey clear-screen Shift-Home $'\e[[[sH'
@@ -642,6 +641,8 @@ zsh-mime-setup
 # Activate syntax highlighting from one of
 # https://github.com/zdharma/fast-syntax-highlighting/
 # https://github.com/zsh-users/zsh-syntax-highlighting/
+# (prefer the latter if ZSHRC_PREFER_ZSH_SYNTAX_HIGHLIGHTING is nonempty;
+# skip both if ZSHRC_SKIP_SYNTAX_HIGHLIGHTING is nonempty.)
 #
 # Set colors according to a 256 color scheme if supported.
 # (We assume always a black background since anything else causes headache.)
@@ -652,19 +653,24 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 zshrc_fast_syntax_highlighting() {
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
+	(($+FAST_HIGHLIGHT_STYLES)) || path=(
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}
-		$path) . fast-syntax-highlighting.plugin.zsh NIL || return
+		$path
+	) . fast-syntax-highlighting.plugin.zsh NIL || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
+	:
 }
 zshrc_zsh_syntax_highlighting() {
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
+	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || path=(
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}
-		$path) . zsh-syntax-highlighting.zsh NIL || return
+		$path
+	) . zsh-syntax-highlighting.zsh NIL || return
 	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
@@ -675,6 +681,7 @@ zshrc_zsh_syntax_highlighting() {
 	)
 	zshrc_highlight_styles \
 		ZSH_HIGHLIGHT_STYLES ZSH_HIGHLIGHT_MATCHING_BRACKETS_STYLES
+	:
 }
 zshrc_highlight_styles() {
 	local -a brackets
@@ -813,35 +820,78 @@ zshrc_highlight_styles() {
 	then	typeset -ga $2
 		set -A $2 $brackets
 	fi
-	unfunction zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting zshrc_highlight_styles
 }
 
-if ! (($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) && ! (($+FAST_HIGHLIGHT_STYLES)) && is-at-least 4.3.9
+if [[ -z "${ZSHRC_SKIP_SYNTAX_HIGHLIGHTING:++}" ]] && is-at-least 4.3.9
 then	if [[ -n "${ZSHRC_PREFER_ZSH_SYNTAX_HIGHLIGHTING:++}" ]]
 	then	zshrc_zsh_syntax_highlighting || zshrc_fast_syntax_highlighting
 	else	zshrc_fast_syntax_highlighting || zshrc_zsh_syntax_highlighting
 	fi
 fi
 
-# Activate incremental completion, see https://github.com/hchbaw/auto-fu.zsh/
-# (Only the most current versions [branch pu] work with syntax-highlighting)
+# Activate autosuggestions and/or incremental completion from one of
+# https://github.com/zsh-users/zsh-autosuggestions/
+#   (only branch features/completion-suggestions supports completion)
+# https://github.com/hchbaw/auto-fu.zsh/
+#   (only branch pu works with {fast,zsh}-syntax-highlighting)
+# (prefer the latter if ZSHRC_PREFER_AUTO_FU is nonempty;
+# otherwise use both only if ZSHRC_USE_AUTO_FU is nonempty
+# skip both if ZSHRC_SKIP_AUTO is nonempty.)
 
-if (($+functions[auto-fu-init])) || {
-	: # Status must be 0 before sourcing auto-fu.zsh
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
-		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
-		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
-		$path) . auto-fu NIL && auto-fu-install
-	} || {
-	:
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
-		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
-		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
-		$path) . auto-fu.zsh NIL
+zshrc_autosuggestions() {
+	is-at-least 4.3.11 || return
+	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || \
+	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
+		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
+		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
+		$path) . zsh-autosuggestions.zsh NIL || return
+	if [[ $(echotc Co) -ge 256 ]]
+	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
+	else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
+	fi
+	typeset -gUa  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS \
+		ZSH_AUTOSUGGEST_ACCEPT_WIDGETS ZSH_AUTOSUGGEST_EXECUTE_WIDGETS \
+		ZSH_AUTOSUGGEST_CLEAR_WIDGETS
+	ZSH_AUTOSUGGEST_STRATEGY=(completion history)
+	ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(${(@)ZSH_AUTOSUGGEST_ACCEPT_WIDGETS:#*forward-char})
+	ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+	autosuggest-self-insert-clear() {
+		zle self-insert
+		_zsh_autosuggest_clear
 	}
-then	# auto-fu.zsh gives confusing messages with warn_create_global:
+	zle -N autosuggest-self-insert-clear
+	zshrc_bindkey autosuggest-self-insert-clear "#"
+	if [[ -z "${ZSHRC_AUTO_ACCEPT:++}" ]]
+	then	if [[ $(echotc Co) -ge 256 ]]
+		then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=202,bg=19'
+		else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
+		fi
+	else	if [[ $(echotc Co) -ge 256 ]]
+		then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold'
+		else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=246,bold'
+		fi
+		zle -N autosuggest-accept-line _zsh_autosuggest_execute
+		zshrc_bindkey autosuggest-accept-line "^M"
+	fi
+}
+
+zshrc_auto_fu_load() {
+	: # Status must be 0 before sourcing auto-fu.zsh
+	. auto-fu NIL && auto-fu-install && return
+	:
+	. auto-fu.zsh NIL
+}
+zshrc_auto_fu() {
+	(($+functions[auto-fu-init])) || path=(
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
+		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
+		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
+		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
+		$path
+	) zshrc_auto_fu_load || return
+	unset ZSHRC_AUTO_ACCEPT
+	# auto-fu.zsh gives confusing messages with warn_create_global:
 	setopt no_warn_create_global
 	# Keep Ctrl-d behavior also when auto-fu is active
 	afu+orf-ignoreeof-deletechar-list() {
@@ -878,22 +928,23 @@ then	# auto-fu.zsh gives confusing messages with warn_create_global:
 	# Therefore, we disable package completion with auto-fu:
 	zstyle ':completion:*:*:eix*:*' tag-order options dummy - '!packages'
 	zstyle ':completion:*:*:emerge:argument-rest*' tag-order values available_sets -
-fi
+}
 
-# Activate autosuggestions from
-# https://github.com/zsh-users/zsh-syntax-highlighting/
-
-if ! (($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) && is-at-least 4.3.11
-then	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
-		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
-		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
-		$path) . zsh-autosuggestions.zsh NIL
+if [[ -z "${ZSHRC_SKIP_AUTO:++}" ]]
+then	if [[ -n "${ZSHRC_PREFER_AUTO_FU:++}" ]]
+	then	zshrc_auto_fu || zshrc_autosuggestions
+	elif [[ -z "${ZSHRC_USE_AUTO_FU}" ]]
+	then	zshrc_autosuggestions || zshrc_auto_fu
+	else	zshrc_auto_fu
+		zshrc_autosuggestions
+	fi
 fi
 
 # Source user functions
 ! (($+functions[after_zshrc])) || after_zshrc "$@"
 
 # Free unused memory unless the user explicitly sets ZSHRC_KEEP_FUNCTIONS
-[[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || \
-	unfunction zshrc_bindkey zshrc_mimevar zshrc_mimedef zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting zshrc_highlight_styles
+[[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || unfunction \
+	zshrc_bindkey zshrc_mimevar zshrc_mimedef zshrc_highlight_styles \
+	zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting \
+	zshrc_autosuggestions zshrc_auto_fu_load zshrc_auto_fu

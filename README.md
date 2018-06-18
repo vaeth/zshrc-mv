@@ -11,8 +11,8 @@ In particular, all of
 
 - command-completion
 - zsh-internal help system
-- https://github.com/hchbaw/auto-fu.zsh/
-- https://github.com/zsh-users/zsh-autosuggestions/
+- One or both of https://github.com/zsh-users/zsh-autosuggestions/
+  or https://github.com/hchbaw/auto-fu.zsh/
 - One of https://github.com/zdharma/fast-syntax-highlighting/
   or https://github.com/zsh-users/zsh-syntax-highlighting/
 - https://github.com/vaeth/runtitle/
@@ -60,7 +60,7 @@ If you want to make use of that feature, you must have set
 
 when sourcing `zshrc` (or set it in the beginning of `zshrc`).
 
-In order to make it easier to you to modify details set in `zshrc`,
+In order to make it easier for you to modify details set in `zshrc`,
 you can define a function `after_zshrc`: If this function is defined,
 it is called at the very end of `zshrc` (passing the arguments of the shell),
 so you can undo/extend any change done in `zshrc` if you wish to.
@@ -127,6 +127,11 @@ they exist:
 
 	`git clone https://github.com/zsh-users/zsh-autosuggesitons.git`
 
+	`git checkout features/completion-suggestions`
+
+	Set `ZSHRC_AUTO_ACCEPT` to a nonempty value if the suggestions should be
+	automatically accepted with return
+
 	or (as a gentoo user) install from the mv overlay.
 
 -	`$DEFAULTS[/zsh][auto-fu[.zsh]]/auto-fu[.zsh]`
@@ -142,6 +147,12 @@ they exist:
 	`git checkout pu`
 
 	or (as a gentoo user) install from the mv overlay.
+
+    If zsh-autosuggestions and auto-fu.zsh are both installed, only the former
+    is used by default. If you want to use the latter instead, set
+	`ZSHRC_PREFER_AUTO_FU` to a nonempty value. If you want to use both, set
+	instead `ZSHRC_USE_AUTO_FU` to a nonempty value.
+	To skip both, set `ZSH_SKIP_AUTO` to a nonempty value.
 
 -	`$DEFAULTS[/zsh][/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
 -	`$GITS[/fast-syntax-highlighting[.git]]/fast-syntax-highlighting.plugin.zsh`
@@ -166,6 +177,11 @@ they exist:
 	`git clone https://github.com/zsh-users/zsh-syntax-highlighting.git`
 
 	or (as a gentoo user) install from the mv overlay.
+
+	If zsh-syntax-highlighting and fast-syntax-highlighting are both installed,
+	the former is used, by default. If you want to use the latter instead, set
+	`ZSHRC_PREFER_ZSH_SYNTAX_HIGHLIGHTING` to a nonempty value.
+	To skip both, set `ZSH_SKIP_SYNTAX_HIGHLIGHTING` to a nonempty value.
 
 The variables `$DEFAULTS`, `$GIT`, and `$EPREFIX` are not honoured for support
 for __runtitle__ and __set_prompt__ (earlier versions of __zshrc-mv__ had some
