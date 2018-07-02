@@ -833,7 +833,7 @@ fi
 
 # Activate autosuggestions and/or incremental completion from one of
 # https://github.com/zsh-users/zsh-autosuggestions/
-#   (only branch features/completion-suggestions supports completion)
+#   (at the time of writing this, branch develop supports completion)
 # https://github.com/hchbaw/auto-fu.zsh/
 #   (only branch pu works with {fast,zsh}-syntax-highlighting)
 # (prefer the latter if ZSHRC_PREFER_AUTO_FU is nonempty;
@@ -852,7 +852,7 @@ zshrc_autosuggestions() {
 	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
 	else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
 	fi
-	#typeset -g ZSH_AUTOSUGGEST_USE_ASYNC=true
+	typeset -g ZSH_AUTOSUGGEST_USE_ASYNC=true
 	typeset -gUa  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS \
 		ZSH_AUTOSUGGEST_ACCEPT_WIDGETS ZSH_AUTOSUGGEST_EXECUTE_WIDGETS \
 		ZSH_AUTOSUGGEST_CLEAR_WIDGETS

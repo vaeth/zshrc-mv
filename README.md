@@ -127,7 +127,7 @@ they exist:
 
 	`git clone https://github.com/zsh-users/zsh-autosuggesitons.git`
 
-	`git checkout features/completion-suggestions`
+	`git checkout develop` (necessary at the time of writing this)
 
 	Set `ZSHRC_AUTO_ACCEPT` to a nonempty value if the suggestions should be
 	automatically accepted with return
