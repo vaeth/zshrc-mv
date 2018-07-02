@@ -252,7 +252,9 @@ zstyle ':completion:*' squeeze-slashes true
 zstyle ':completion:*' use-compctl false
 zstyle ':completion:*' use-cache false
 zstyle ':completion:*' list-dirs-first true
-zstyle ':completion:*' sort false
+if is-at-least 5.6 # quadratic runtime for <=zsh-5.5.1
+then	: # zstyle ':completion:*' sort false
+fi
 if is-at-least 4.3.10
 then	zstyle ':completion:*' format '%b%F{yellow}(%d)%f'
 else	zstyle ':completion:*' format '%B(%d)%b'
@@ -850,6 +852,7 @@ zshrc_autosuggestions() {
 	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
 	else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
 	fi
+	#typeset -g ZSH_AUTOSUGGEST_USE_ASYNC=true
 	typeset -gUa  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS \
 		ZSH_AUTOSUGGEST_ACCEPT_WIDGETS ZSH_AUTOSUGGEST_EXECUTE_WIDGETS \
 		ZSH_AUTOSUGGEST_CLEAR_WIDGETS
