@@ -856,6 +856,7 @@ zshrc_autosuggestions() {
 	typeset -gUa  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS \
 		ZSH_AUTOSUGGEST_ACCEPT_WIDGETS ZSH_AUTOSUGGEST_EXECUTE_WIDGETS \
 		ZSH_AUTOSUGGEST_CLEAR_WIDGETS
+	typeset -ga ZSH_AUTOSUGGEST_STRATEGY
 	ZSH_AUTOSUGGEST_STRATEGY=(completion history)
 	ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(${(@)ZSH_AUTOSUGGEST_ACCEPT_WIDGETS:#*forward-char})
 	ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
@@ -867,7 +868,7 @@ zshrc_autosuggestions() {
 	zshrc_bindkey autosuggest-self-insert-clear "#"
 	if [[ -z "${ZSHRC_AUTO_ACCEPT:++}" ]]
 	then	if [[ $(echotc Co) -ge 256 ]]
-		then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=202,bg=19'
+		then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=136,bg=235'
 		else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
 		fi
 	else	if [[ $(echotc Co) -ge 256 ]]
