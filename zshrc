@@ -663,6 +663,7 @@ zshrc_fast_syntax_highlighting() {
 		$path
 	) . fast-syntax-highlighting.plugin.zsh NIL || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
+	FAST_HIGHLIGHT[use_async]=1
 	:
 }
 zshrc_zsh_syntax_highlighting() {
