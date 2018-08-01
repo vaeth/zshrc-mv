@@ -664,6 +664,7 @@ zshrc_fast_syntax_highlighting() {
 	) . fast-syntax-highlighting.plugin.zsh NIL || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
 	FAST_HIGHLIGHT[use_async]=1
+	FAST_HIGHLIGHT[use_brackets]=1
 	:
 }
 zshrc_zsh_syntax_highlighting() {
@@ -709,6 +710,7 @@ zshrc_highlight_styles() {
 			'precommand'                    fg=40,bold
 			'hashed-command'                fg=40,bold
 			'path'                          fg=214,bold
+			'path-to-dir'                   fg=208
 			'path_prefix'                   fg=202,bold
 			'path_approx'                   fg=202,bold
 			'globbing'                      fg=190,bold
@@ -741,6 +743,7 @@ zshrc_highlight_styles() {
 			'redirection'                   fg=123,bold
 			'suffix-alias'                  fg=84,bold
 			'variable'                      fg=208
+			'paired-bracket'                fg=98
 		)
 		case ${SOLARIZED:-n} in
 		([nNfF]*|[oO][fF]*|0|-)
@@ -812,6 +815,7 @@ zshrc_highlight_styles() {
 			'redirection'                   fg=blue,bold
 			'suffix-alias'                  fg=green
 			'variable'                      fg=yellow,bold
+			'paired-bracket'                fg=magenta,bold
 		)
 	fi
 	for i in {1..5}
