@@ -710,7 +710,7 @@ zshrc_highlight_styles() {
 			'precommand'                    fg=40,bold
 			'hashed-command'                fg=40,bold
 			'path'                          fg=214,bold
-			'path-to-dir'                   fg=208
+			'path-to-dir'                   fg=yellow,bold
 			'path_prefix'                   fg=202,bold
 			'path_approx'                   fg=202,bold
 			'globbing'                      fg=190,bold
@@ -758,6 +758,7 @@ zshrc_highlight_styles() {
 			'precommand'                    fg=green
 			'hashed-command'                fg=green
 			'path'                          fg=yellow
+			'path-to-dir'                   fg=214,bold
 			'path_prefix'                   fg=yellow
 			'globbing'                      fg=magenta
 			'single-hyphen-option'          fg=green,bold
@@ -783,6 +784,7 @@ zshrc_highlight_styles() {
 			'precommand'                    fg=yellow,bold
 			'hashed-command'                fg=yellow,bold
 			'path'                          fg=white,bold
+			'path-to-dir'                   fg=yellow,bold
 			'path_prefix'                   fg=white,bold
 			'path_approx'                   none
 			'globbing'                      fg=magenta,bold
