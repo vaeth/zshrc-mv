@@ -2,8 +2,7 @@
 
 (C) Martin Väth (martin at mvath.de)
 
-You can copy the `zshrc` file completely or partly, as you need.
-Comments are welcome.
+This project is under the Creative Commons CC-BY-4.0 license.
 
 zshrc is a __zsh__ initialization file (e.g. to be used as `/etc/zshrc` or
 `~/.zshrc`) which activates a lot of zsh interactive features.
@@ -64,6 +63,12 @@ In order to make it easier for you to modify details set in `zshrc`,
 you can define a function `after_zshrc`: If this function is defined,
 it is called at the very end of `zshrc` (passing the arguments of the shell),
 so you can undo/extend any change done in `zshrc` if you wish to.
+
+For example, by default zshrc disables a history file.
+If you call enable_history in the function after_zshrc,
+the history will be saved to $HOME/history and restored from there:
+after_zshrc() enable_history
+(use read_history to pick up changes saved in another terminal)
 
 Also some other paths are configurable if you have set
 

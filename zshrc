@@ -92,6 +92,9 @@ setopt path_dirs auto_name_dirs bash_auto_list prompt_subst no_beep
 setopt no_list_ambiguous list_packed
 setopt hist_ignore_all_dups hist_reduce_blanks hist_verify no_hist_expand
 setopt extended_glob hist_subst_pattern
+#setopt hist_ignore_space # distinguish 1/2 spaces in zshaddhistory() instead
+setopt hist_lex_words hist_no_functions hist_save_no_dups
+setopt no_append_history inc_append_history
 setopt no_glob_dots no_nomatch no_null_glob numeric_glob_sort no_sh_glob
 setopt mail_warning interactive_comments no_clobber
 setopt no_bg_nice no_check_jobs no_hup long_list_jobs monitor notify
@@ -117,11 +120,37 @@ ttyctl -f
 
 # History
 
-SAVEHIST=${HISTSIZE:-1000}
+DIRSTACKSIZE=100
+HISTSIZE=9999999
+SAVEHIST=$HISTSIZE
 unset HISTFILE
 
-DIRSTACKSIZE=100
+# Call enable_history in after_zsh if you want a histfile.
+# This will also pick up changes saved in another terminal.
+enable_history() {
+	emulate -L zsh
+	typeset -g HISTFILE=$HOME/history
+	fc -RI
+}
 
+# Pick up changes saved in another terminal without necessarily enabling saving
+read_history() {
+	emulate -L zsh
+	fc -RI ${HISTFILE:-$HOME/history}
+}
+
+disable_history() {
+	unset HISTFILE
+}
+
+zshaddhistory() {
+	case $1 in
+	'  '*|'	')
+		return 1;; # Save neither in history nor $HISTFILE
+	' '*|'# '*|knock*' '[0123456789]*)
+		return 2;; # Exclude from $HISTFILE
+	esac
+}
 
 # The code in this file needs some modules
 
@@ -154,6 +183,7 @@ autoload -Uz colors zargs zcalc zed zmv
 	# Title are the first 3 words starting with sane chars (paths cutted)
 	# We also truncate to at most 30 characters and add dots if args follow
 	set_title() {
+		emulate -L zsh
 		local a b
 		a=(${=${(@)${=1}:t}})
 		a=(${=${a##[-\&\|\(\)\{\}\;]*}})
