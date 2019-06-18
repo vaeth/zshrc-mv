@@ -144,10 +144,18 @@ disable_history() {
 }
 
 zshaddhistory() {
+	# Lines starting with 2 spaces are not even temporarily saved.
+	# Comment lines are not stored in $HISTFILE unless the # is immediately
+	# followed by a non-alphanumeric symbol (e.g. a space or a ! or a #).
+	# Usual navigation or file operation commands are not store in $HISTFILE
 	case $1 in
-	'  '*|'	')
+	[[:space:]][[:space:]]*|'	'*)
 		return 1;; # Save neither in history nor $HISTFILE
-	' '*|'# '*|knock*' '[0123456789]*)
+	[[:space:]]*|'#'[[:alnum:]]*|'#')
+		return 2;; # Exclude from $HISTFILE
+	esac
+	case ${1%%[[:space:]]*} in
+	ls|l|lt|pwd|cd|..|...*|cp|copy|cpi|mv|move|mvi|ren|cat|echo|less|vi|emacs)
 		return 2;; # Exclude from $HISTFILE
 	esac
 }
