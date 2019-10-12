@@ -1,6 +1,6 @@
 # zshrc-mv
 
-(C) Martin Väth (martin at mvath.de)
+(C) Martin Väth (mvath at google.com)
 
 This project is under the Creative Commons CC-BY-4.0 license.
 

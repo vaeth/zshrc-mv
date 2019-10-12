@@ -693,26 +693,28 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 zshrc_fast_syntax_highlighting() {
-	(($+FAST_HIGHLIGHT_STYLES)) || path=(
+	local path PATH
+	path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}
-		$path
-	) . fast-syntax-highlighting.plugin.zsh NIL || return
+		$path)
+	(($+FAST_HIGHLIGHT_STYLES)) || . fast-syntax-highlighting.plugin.zsh NIL || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
 	FAST_HIGHLIGHT[use_async]=1
 	FAST_HIGHLIGHT[use_brackets]=1
 	:
 }
 zshrc_zsh_syntax_highlighting() {
-	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || path=(
+	local path PATH
+	path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}
-		$path
-	) . zsh-syntax-highlighting.zsh NIL || return
+		$path)
+	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || . zsh-syntax-highlighting.zsh NIL || return
 	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
@@ -887,12 +889,13 @@ fi
 
 zshrc_autosuggestions() {
 	is-at-least 4.3.11 || return
-	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || \
+	local path PATH
 	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
 		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
 		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
-		$path) . zsh-autosuggestions.zsh NIL || return
+		$path)
+	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || . zsh-autosuggestions.zsh NIL || return
 	if [[ $(echotc Co) -ge 256 ]]
 	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
 	else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
@@ -932,13 +935,14 @@ zshrc_auto_fu_load() {
 	. auto-fu.zsh NIL
 }
 zshrc_auto_fu() {
-	(($+functions[auto-fu-init])) || path=(
+	local path PATH
+	path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
 		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
 		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
-		$path
-	) zshrc_auto_fu_load || return
+		$path)
+	(($+functions[auto-fu-init])) || . zshrc_auto_fu_load || return
 	unset ZSHRC_AUTO_ACCEPT
 	# auto-fu.zsh gives confusing messages with warn_create_global:
 	setopt no_warn_create_global
