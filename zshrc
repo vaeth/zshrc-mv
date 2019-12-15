@@ -144,14 +144,14 @@ disable_history() {
 }
 
 zshaddhistory() {
-	# Lines starting with 2 spaces are not even temporarily saved.
+	# Lines starting with 2 spaces or a tab are not even temporarily saved.
 	# Comment lines are not stored in $HISTFILE unless the # is immediately
-	# followed by a non-alphanumeric symbol (e.g. a space or a ! or a #).
+	# followed by a typical non-command symbol (e.g. a space, !, or #)
 	# Usual navigation or file operation commands are not store in $HISTFILE
 	case $1 in
 	[[:space:]][[:space:]]*|'	'*)
 		return 1;; # Save neither in history nor $HISTFILE
-	[[:space:]]*|'#'[[:alnum:]]*|'#')
+	[[:space:]]*|'#'[[:alnum:]_:./]*|'#')
 		return 2;; # Exclude from $HISTFILE
 	esac
 	case ${1%%[[:space:]]*} in
@@ -693,28 +693,32 @@ zsh-mime-setup
 # XTerm*foreground:  white
 
 zshrc_fast_syntax_highlighting() {
-	local path PATH
-	path=(
-		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
+	(($+FAST_HIGHLIGHT_STYLES)) || () {
+		# fast-syntax-highlighting must not be in PATH when we source
+		local i j
+		j=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}
 		$path)
-	(($+FAST_HIGHLIGHT_STYLES)) || . fast-syntax-highlighting.plugin.zsh NIL || return
+		for i in $j
+		do	. $i/fast-syntax-highlighting.plugin.zsh NIL && return
+		done
+		return 1
+	} || return
 	zshrc_highlight_styles FAST_HIGHLIGHT_STYLES
 	FAST_HIGHLIGHT[use_async]=1
 	FAST_HIGHLIGHT[use_brackets]=1
 	:
 }
 zshrc_zsh_syntax_highlighting() {
-	local path PATH
-	path=(
+	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}}
 		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}
-		$path)
-	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || . zsh-syntax-highlighting.zsh NIL || return
+		$path
+	) . zsh-syntax-highlighting.zsh NIL || return
 	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(
 		main		# color syntax while typing (active by default)
@@ -889,13 +893,12 @@ fi
 
 zshrc_autosuggestions() {
 	is-at-least 4.3.11 || return
-	local path PATH
-	path=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
+	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || path=(
+		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
 		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
 		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
-		$path)
-	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || . zsh-autosuggestions.zsh NIL || return
+		$path) . zsh-autosuggestions.zsh NIL || return
 	if [[ $(echotc Co) -ge 256 ]]
 	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
 	else	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold,bg=magenta'
@@ -926,6 +929,8 @@ zshrc_autosuggestions() {
 		zle -N autosuggest-accept-line _zsh_autosuggest_execute
 		zshrc_bindkey autosuggest-accept-line "^M"
 	fi
+	# These commands use too many resources for zsh-autosuggestions:
+	typeset -g AUTOSUGGEST_COMPLETION_IGNORE='blaze *|rabbit *'
 }
 
 zshrc_auto_fu_load() {
@@ -935,14 +940,13 @@ zshrc_auto_fu_load() {
 	. auto-fu.zsh NIL
 }
 zshrc_auto_fu() {
-	local path PATH
-	path=(
+	(($+functions[auto-fu-init])) || path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
 		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
 		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
 		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
-		$path)
-	(($+functions[auto-fu-init])) || . zshrc_auto_fu_load || return
+		$path
+	) zshrc_auto_fu_load || return
 	unset ZSHRC_AUTO_ACCEPT
 	# auto-fu.zsh gives confusing messages with warn_create_global:
 	setopt no_warn_create_global
@@ -997,7 +1001,7 @@ fi
 ! (($+functions[after_zshrc])) || after_zshrc "$@"
 
 # Free unused memory unless the user explicitly sets ZSHRC_KEEP_FUNCTIONS
-[[ -z "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || unfunction \
+[[ -n "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || unfunction \
 	zshrc_bindkey zshrc_mimevar zshrc_mimedef zshrc_highlight_styles \
 	zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting \
 	zshrc_autosuggestions zshrc_auto_fu_load zshrc_auto_fu
