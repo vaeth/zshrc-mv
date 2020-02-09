@@ -209,9 +209,9 @@ autoload -Uz colors zargs zcalc zed zmv
 for HELPDIR in \
 	${DEFAULTS:+${^DEFAULTS%/}/zsh{-,/}help} \
 	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
-	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib/help} \
+	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}/help} \
 	/usr/share/zsh/$ZSH_VERSION/help \
-	/usr/share/zsh/site-contrib/help
+	/usr/share/zsh/site-{contrib,functions}/help
 do	[[ -d $HELPDIR ]] && {
 		alias run-help NUL && unalias run-help
 		autoload -Uz run-help
@@ -698,8 +698,8 @@ zshrc_fast_syntax_highlighting() {
 		local i j
 		j=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}}
-		/usr/share/zsh/site-contrib{/fast-syntax-highlighting,}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}{/fast-syntax-highlighting,}}
+		/usr/share/zsh/site-{contrib,functions}{/fast-syntax-highlighting,}
 		$path)
 		for i in $j
 		do	. $i/fast-syntax-highlighting.plugin.zsh NIL && return
@@ -715,8 +715,8 @@ zshrc_zsh_syntax_highlighting() {
 	(($+ZSH_HIGHLIGHT_HIGHLIGHTERS)) || path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/zsh-syntax-highlighting{.git,},}}
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}}
-		/usr/share/zsh/site-contrib{/zsh-syntax-highlighting,}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}{/zsh-syntax-highlighting,}}
+		/usr/share/zsh/site-{contrib,functions}{/zsh-syntax-highlighting,}
 		$path
 	) . zsh-syntax-highlighting.zsh NIL || return
 	typeset -gUa ZSH_HIGHLIGHT_HIGHLIGHTERS
@@ -896,8 +896,8 @@ zshrc_autosuggestions() {
 	(($+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE)) || path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/zsh-autosuggestions,}}
 		${GITS:+${^GITS%/}{/zsh-autosuggestions{.git,},}}
-		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/zsh-autosuggestions,}}
-		/usr/share/zsh/site-contrib{/zsh-autosuggestions,}
+		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}{/zsh-autosuggestions,}}
+		/usr/share/zsh/site-{contrib,functions}{/zsh-autosuggestions,}
 		$path) . zsh-autosuggestions.zsh NIL || return
 	if [[ $(echotc Co) -ge 256 ]]
 	then	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=99,bold,bg=18'
@@ -943,8 +943,8 @@ zshrc_auto_fu() {
 	(($+functions[auto-fu-init])) || path=(
 		${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/auto-fu{.zsh,},}}
 		${GITS:+${^GITS%/}{/auto-fu{.zsh,}{.git,},}}
-		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}}
-		/usr/share/zsh/site-contrib{/auto-fu{.zsh,},}
+		${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}{/auto-fu{.zsh,},}}
+		/usr/share/zsh/site-{contrib,functions}{/auto-fu{.zsh,},}
 		$path
 	) zshrc_auto_fu_load || return
 	unset ZSHRC_AUTO_ACCEPT

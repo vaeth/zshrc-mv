@@ -92,9 +92,10 @@ they exist:
 -	`$DEFAULTS/zsh/help`
 -	`$EPREFIX/usr/share/zsh/$ZSH_VERSION/help`
 -	`$EPREFIX/usr/share/zsh/site-contrib/help`
+-	`$EPREFIX/usr/share/zsh/site-functions/help`
 
 	This substitutes `/usr/share/zsh/$ZSH_VERSION/help` or
-	`/usr/share/size-contrib/help`.
+	`/usr/share/size-contrib/help` or `/usr/share/size-functions/help`.
 	The content should be generated with the `Util/helpfiles` script
 	as described in the __zsh__ manpage.
 
@@ -124,11 +125,11 @@ they exist:
 
 -	`$DEFAULTS[/zsh][/zsh-autosuggestions]/zsh-autosuggestions.zsh`
 -	`$GITS[/zsh-autosuggestions[.git]]/zsh-autosuggestions.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib[/zsh-autosuggestions]/zsh-autosuggestions.zsh`
+-	`$EPREFIX/usr/share/zsh/site-[contrib|functions][/zsh-autosuggestions]/zsh-autosuggestions.zsh`
 
 	This substitutes the corresponding file in
-	`/usr/share/zsh/site-contrib`. Fallback is to use `$PATH`.
-	Download e.g. with
+	`/usr/share/zsh/site-contrib` or `/usr/share/zsh/site-functions`.
+	Fallback is to use `$PATH`. Download e.g. with
 
 	`git clone https://github.com/zsh-users/zsh-autosuggesitons.git`
 
@@ -141,11 +142,11 @@ they exist:
 
 -	`$DEFAULTS[/zsh][auto-fu[.zsh]]/auto-fu[.zsh]`
 -	`$GITS[/auto-fu[.zsh][.git]]/auto-fu[.zsh]`
--	`$EPREFIX/usr/share/zsh/site-contrib[/auto-fu[.zsh]]/auto-fu[.zsh]`
+-	`$EPREFIX/usr/share/zsh/site-[contrib|functions][/auto-fu[.zsh]]/auto-fu[.zsh]`
 
 	This substitutes the corresponding file in
-	`/usr/share/zsh/site-contrib`. Fallback is to use `$PATH`.
-	Download e.g. with
+	`/usr/share/zsh/site-contrib` or `/usr/share/zsh/site-functions`.
+	Fallback is to use `$PATH`. Download e.g. with
 
 	`git clone https://github.com/hchbaw/auto-fu.zsh.git`
 
@@ -161,10 +162,10 @@ they exist:
 
 -	`$DEFAULTS[/zsh][/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
 -	`$GITS[/fast-syntax-highlighting[.git]]/fast-syntax-highlighting.plugin.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib[/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
+-	`$EPREFIX/usr/share/zsh/site-[contrib|functions][/fast-syntax-highlighting]/fast-syntax-highlighting.plugin.zsh`
 
 	This substitutes the corresponding file in
-	`/usr/share/zsh/site-contrib` if available.
+	`/usr/share/zsh/site-contrib` or `/usr/share/zsh/site-functions`.
 	Fallback is to use `$PATH`. Download e.g. with
 
 	`git clone https://github.com/zdharma/fast-syntax-highlighting.git`
@@ -173,10 +174,10 @@ they exist:
 
 -	`$DEFAULTS[/zsh][/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
 -	`$GITS[/zsh-syntax-highlighting[.git]]/zsh-syntax-highlighting.zsh`
--	`$EPREFIX/usr/share/zsh/site-contrib[/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
+-	`$EPREFIX/usr/share/zsh/site-[contrib|functions][/zsh-syntax-highlighting]/zsh-syntax-highlighting.zsh`
 
 	This substitutes the corresponding file in
-	`/usr/share/zsh/site-contrib` if available.
+	`/usr/share/zsh/site-contrib` or `/usr/share/zsh/site-functions`.
 	Fallback is to use `$PATH`. Download e.g. with
 
 	`git clone https://github.com/zsh-users/zsh-syntax-highlighting.git`
