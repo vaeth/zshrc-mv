@@ -173,6 +173,8 @@ zmodload zsh/zutil
 autoload -Uz colors zargs zcalc zed zmv
 #colors
 
+alias 'zmv'='noglob zmv'
+alias 'zcalc'='noglob zcalc'
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/ (v3.0.0 or newer)
 
