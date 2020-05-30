@@ -80,6 +80,11 @@ case ${TERM-} in
 	TERM=$TERM-256color;;
 esac
 
+# The zsh whence is slow when a $PATH component is remote. Instead, we use a
+# caching function with exit status 0 if the argument is a command or function:
+zshrc_whence() {
+	(($+commands[$1]$+functions[$1]))
+}
 
 # These are needed later on
 autoload -Uz add-zsh-hook pick-web-browser zsh-mime-setup is-at-least
@@ -178,7 +183,7 @@ alias 'zcalc'='noglob zcalc'
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/ (v3.0.0 or newer)
 
-(($+commands[set_prompt.sh])) && () {
+zshrc_whence set_prompt.sh && () {
 	setopt local_options no_warn_create_global
 	(($+functions[set_prompt])) || . set_prompt.sh NIL && {
 		set_prompt -r
@@ -189,7 +194,7 @@ alias 'zcalc'='noglob zcalc'
 
 # Activate support for title from https://github.com/vaeth/runtitle/
 
-(($+commands[title])) && {
+zshrc_whence && {
 	# Title are the first 3 words starting with sane chars (paths cutted)
 	# We also truncate to at most 30 characters and add dots if args follow
 	set_title() {
@@ -229,8 +234,8 @@ done
 # I recommend https://github.com/vaeth/termcolors-mv/
 # but a fallback is used if the corresponding script is not in path.
 
-[[ -n ${LS_COLORS:++} ]] || ! (($+commands[dircolors])) || {
-	if (($+commands[dircolors-mv]))
+[[ -n ${LS_COLORS:++} ]] || ! zshrc_whence dircolors || {
+	if zshrc_whence dircolors-mv
 	then	() {
 		setopt local_options no_warn_create_global
 		local i e
@@ -339,29 +344,31 @@ _my_cd() CDPATH= _cd "$@"
 compdef _my_cd cd
 
 # mtools completion can hang, so we eliminate it:
-compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel mmd mmount mmove mrd mread mren mtoolstest mtype
+compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel \
+	mmd mmount mmove mrd mread mren mtoolstest mtype
 
-(($+commands[sshrc])) && compdef sshrc=ssh
+zshrc_whence sshrc && compdef sshrc=ssh
 
 # Some private shell functions or wrapper scripts behave like other commands:
 (($+functions[mcd])) && compdef mcd=cd
-whence gpg.wrapper NUL && compdef gpg.wrapper=gpg
+zshrc_whence gpg.wrapper && compdef gpg.wrapper=gpg
 () {
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
 	do	for j in $i.{32,64}
-		do	whence $j NUL && compdef $j=$i && alias $j="noglob $j"
+		do	zshrc_whence $j && compdef $j=$i \
+				&& alias $j="noglob $j"
 		done
-		whence $i NUL && alias $i="noglob $i"
+		zshrc_whence $i && alias $i="noglob $i"
 	done
 	for i in emerge.{binpkg,noprotect} squashmount.chroot
-	do	whence $i NUL && compdef $i=${i%%.*} && alias $i="noglob $i"
+	do	zshrc_whence $i && compdef $i=${i%%.*} && alias $i="noglob $i"
 	done
 	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
-	do	whence $i NUL && alias $i="noglob $i"
+	do	zshrc_whence $i && alias $i="noglob $i"
 	done
 	for i in rsync{,p}{,i}{,.bare}.wrapper
-	do	whence $i NUL && compdef $i=rsync
+	do	zshrc_whence $i && compdef $i=rsync
 	done
 }
 
@@ -601,7 +608,7 @@ zshrc_mimevar() {
 	shift
 	r=$1
 	for i
-	do	whence ${i#-} NUL && r=$i && break
+	do	zshrc_whence ${i#-} && r=$i && break
 	done
 	typeset -g $j=${r#-}
 	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal || \
@@ -653,7 +660,7 @@ zshrc_mimedef PDFVIEWER pdf
 zshrc_mimevar DJVREADER djview djview4 okular evince
 zshrc_mimedef DJVREADER djv{u,}
 
-zshrc_mimevar EPUBREADER fbreader calibre firefox
+zshrc_mimevar EPUBREADER mupdf fbreader calibre firefox
 zshrc_mimedef EPUBREADER epub
 
 zshrc_mimevar MOBIREADER fbreader calibre
@@ -1006,4 +1013,4 @@ fi
 [[ -n "${ZSHRC_KEEP_FUNCTIONS:++}" ]] || unfunction \
 	zshrc_bindkey zshrc_mimevar zshrc_mimedef zshrc_highlight_styles \
 	zshrc_fast_syntax_highlighting zshrc_zsh_syntax_highlighting \
-	zshrc_autosuggestions zshrc_auto_fu_load zshrc_auto_fu
+	zshrc_autosuggestions zshrc_auto_fu_load zshrc_auto_fu zshrc_whence
