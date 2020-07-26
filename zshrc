@@ -11,6 +11,8 @@
 #   (the arrays can be also single strings)
 # if you want to make use of the corresponding features;
 # See the README.md shipped with zshrc-mv for more details.
+#
+# SPDX-License-Identifier: CC-BY-4.0
 
 export SHELL=/bin/zsh
 

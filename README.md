@@ -3,6 +3,7 @@
 (C) Martin Väth (mvath at google.com)
 
 This project is under the Creative Commons CC-BY-4.0 license.
+SPDX-License-Identifier: CC-BY-4.0
 
 zshrc is a __zsh__ initialization file (e.g. to be used as `/etc/zshrc` or
 `~/.zshrc`) which activates a lot of zsh interactive features.
