@@ -32,6 +32,11 @@ alias -g 'NUL'='>/dev/null'
 alias -g 'NULL'='NUL'
 alias -g 'NIL'='>&/dev/null'
 
+# Let -- tacitly "reload" the current directory after filesystem changes.
+# Note that the necessary option -q is not available in bash.
+
+alias -- --='cd -q -- $PWD'
+
 # Make noglob not work like "command" but expand aliases:
 
 alias 'noglob'='noglob '
@@ -217,18 +222,17 @@ zshrc_whence && {
 
 for HELPDIR in \
 	${DEFAULTS:+${^DEFAULTS%/}/zsh{-,/}help} \
+	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/help} \
 	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/$ZSH_VERSION/help} \
 	${EPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}/help} \
-	/usr/share/zsh/$ZSH_VERSION/help \
+	/usr/share/zsh/{,$ZSH_VERSION/}help \
 	/usr/share/zsh/site-{contrib,functions}/help
-do	[[ -d $HELPDIR ]] && {
-		alias run-help NUL && unalias run-help
-		autoload -Uz run-help
-		alias help=run-help
-		[[ -n ${HELPDIR:++} ]] || unset HELPDIR
-		break
-	}
+do	[[ -d $HELPDIR ]] && break
 done
+alias run-help NUL && unalias run-help
+autoload -Uz run-help
+alias help=run-help
+[[ -n ${HELPDIR:++} ]] || unset HELPDIR
 
 
 # Define LS_COLORS if not already done in $interactive

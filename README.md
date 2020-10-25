@@ -1,6 +1,6 @@
 # zshrc-mv
 
-(C) Martin Väth (mvath at google.com)
+(C) Martin Väth (martin at mvath.de)
 
 This project is under the Creative Commons CC-BY-4.0 license.
 SPDX-License-Identifier: CC-BY-4.0
@@ -27,9 +27,9 @@ in the mv overlay (available via layman).
 
 Concerning the colors which `zshrc` sets, only the following cases are tested
 (and probably things will look ugly in other cases):
-1. You use a terminal with a black background (and the 256 colors are mainly
-   tested with xterm - with other terminals e.g. the highlighted colors
-   may look differently and maybe bad).
+1. A terminal with a black background (and the 256 colors are mainly tested
+   with xterm - with other terminals e.g. the highlighted colors may look
+   differently and maybe bad).
    My testing xresources for xterm contain:
    ```
 	XTerm*cursorColor: green
@@ -155,8 +155,8 @@ they exist:
 
 	or (as a gentoo user) install from the mv overlay.
 
-    If zsh-autosuggestions and auto-fu.zsh are both installed, only the former
-    is used by default. If you want to use the latter instead, set
+	If zsh-autosuggestions and auto-fu.zsh are both installed, only the former
+	is used by default. If you want to use the latter instead, set
 	`ZSHRC_PREFER_AUTO_FU` to a nonempty value. If you want to use both, set
 	instead `ZSHRC_USE_AUTO_FU` to a nonempty value.
 	To skip both, set `ZSH_SKIP_AUTO` to a nonempty value.
