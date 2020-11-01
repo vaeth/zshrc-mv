@@ -170,6 +170,7 @@ zshaddhistory() {
 	?|l?|pwd|cd|-*|..|...*|cp*|copy|mv*|move|ren|cat|echo|less|vi|emacs)
 		return 2;; # navigation commands are excluded from $HISTFILE
 	esac
+	local MATCH MBEGIN MEND
 	# No arguments or only digits (secret?) do not go to $HISTFILE
 	! [[ ${1#$c} =~ ^[[:digit:][:space:]]*$ ]] || return 2
 	# Non-command/function/alias/executable: presumably a typo
