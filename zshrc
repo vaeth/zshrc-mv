@@ -156,20 +156,25 @@ disable_history() {
 }
 
 zshaddhistory() {
-	# Lines starting with 2 spaces or a tab are not even temporarily saved.
-	# Comment lines are not stored in $HISTFILE unless the # is immediately
-	# followed by a typical non-command symbol (e.g. a space, !, or #)
-	# Usual navigation or file operation commands are not store in $HISTFILE
 	case $1 in
-	[[:space:]][[:space:]]*|'	'*)
+	[[:space:]][[:space:]]*|'	'*) # Starting with two spaces or tab:
 		return 1;; # Save neither in history nor $HISTFILE
-	[[:space:]]*|'#'[[:alnum:]_:./]*|'#')
+	[[:space:]]*|'#'[[:alnum:]_:./]*|'#') # Starting with one space or #cmd
 		return 2;; # Exclude from $HISTFILE
 	esac
-	case ${1%%[[:space:]]*} in
-	ls|l|lt|pwd|cd|..|...*|cp|copy|cpi|mv|move|mvi|ren|cat|echo|less|vi|emacs)
-		return 2;; # Exclude from $HISTFILE
+	local c
+	c=${1%%[[:space:]]*}
+	case $c in
+	[\#\(\{\"\'\\]*|*'='*) # "# comment", "#!command", "VAR=", Metasymbols
+		return 0;; # are saved
+	?|l?|pwd|cd|-*|..|...*|cp*|copy|mv*|move|ren|cat|echo|less|vi|emacs)
+		return 2;; # navigation commands are excluded from $HISTFILE
 	esac
+	# No arguments or only digits (secret?) do not go to $HISTFILE
+	! [[ ${1#$c} =~ ^[[:digit:][:space:]]*$ ]] || return 2
+	# Non-command/function/alias/executable: presumably a typo
+	(($+commands[$c]$+functions[$c]$+aliases[$c])) || [[ -x $c ]] \
+		|| return 2 # does not go to $HISTFILE either
 }
 
 # The code in this file needs some modules
@@ -944,8 +949,6 @@ zshrc_autosuggestions() {
 		zle -N autosuggest-accept-line _zsh_autosuggest_execute
 		zshrc_bindkey autosuggest-accept-line "^M"
 	fi
-	# These commands use too many resources for zsh-autosuggestions:
-	typeset -g AUTOSUGGEST_COMPLETION_IGNORE='blaze *|rabbit *'
 }
 
 zshrc_auto_fu_load() {
