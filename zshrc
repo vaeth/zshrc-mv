@@ -195,7 +195,7 @@ alias 'zcalc'='noglob zcalc'
 
 # Activate the prompt from https://github.com/vaeth/set_prompt/ (v3.0.0 or newer)
 
-zshrc_whence set_prompt.sh && () {
+! zshrc_whence set_prompt.sh || () {
 	setopt local_options no_warn_create_global
 	(($+functions[set_prompt])) || . set_prompt.sh NIL && {
 		set_prompt -r
@@ -206,7 +206,7 @@ zshrc_whence set_prompt.sh && () {
 
 # Activate support for title from https://github.com/vaeth/runtitle/
 
-zshrc_whence && {
+! zshrc_whence title || {
 	# Title are the first 3 words starting with sane chars (paths cutted)
 	# We also truncate to at most 30 characters and add dots if args follow
 	set_title() {
@@ -358,28 +358,33 @@ compdef _my_cd cd
 compdef _files mattrib mcopy mdel mdu mdeltree mdir mformat mlabel \
 	mmd mmount mmove mrd mread mren mtoolstest mtype
 
-zshrc_whence sshrc && compdef sshrc=ssh
+! zshrc_whence sshrc || compdef sshrc=ssh
 
 # Some private shell functions or wrapper scripts behave like other commands:
-(($+functions[mcd])) && compdef mcd=cd
-zshrc_whence gpg.wrapper && compdef gpg.wrapper=gpg
+! (($+functions[mcd])) || compdef mcd=cd
+! zshrc_whence gpg.wrapper || compdef gpg.wrapper=gpg
 () {
 	local i j
 	for i in eix{,-diff,-update,-sync,-test-obsolete} useflags
 	do	for j in $i.{32,64}
-		do	zshrc_whence $j && compdef $j=$i \
-				&& alias $j="noglob $j"
+		do	if zshrc_whence $j
+			then	compdef $j=$i
+				alias $j="noglob $j"
+			fi
 		done
-		zshrc_whence $i && alias $i="noglob $i"
+		! zshrc_whence $i || alias $i="noglob $i"
 	done
 	for i in emerge.{binpkg,noprotect} squashmount.chroot
-	do	zshrc_whence $i && compdef $i=${i%%.*} && alias $i="noglob $i"
+	do	if zshrc_whence $i
+		then	compdef $i=${i%%.*}
+			alias $i="noglob $i"
+		fi
 	done
 	for i in emerge squashmount squash_dir wget youtube-dl curl ssh
-	do	zshrc_whence $i && alias $i="noglob $i"
+	do	! zshrc_whence $i || alias $i="noglob $i"
 	done
 	for i in rsync{,p}{,i}{,.bare}.wrapper
-	do	zshrc_whence $i && compdef $i=rsync
+	do	! zshrc_whence $i || compdef $i=rsync
 	done
 }
 
@@ -619,7 +624,10 @@ zshrc_mimevar() {
 	shift
 	r=$1
 	for i
-	do	zshrc_whence ${i#-} && r=$i && break
+	do	if zshrc_whence ${i#-}
+		then	r=$i
+			break
+		fi
 	done
 	typeset -g $j=${r#-}
 	[[ $r == -* ]] && typeset -g ${j}_flags=needsterminal || \
