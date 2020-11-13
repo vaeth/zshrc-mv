@@ -35,7 +35,11 @@ alias -g 'NIL'='>&/dev/null'
 # Let -- tacitly "reload" the current directory after filesystem changes.
 # Note that the necessary option -q is not available in bash.
 
-alias -- --='cd -q -- $PWD'
+alias -- -- NUL && unalias -- --
+--() {
+	setopt local_options no_auto_pushd
+	cd -q -- $PWD
+}
 
 # Make noglob not work like "command" but expand aliases:
 
