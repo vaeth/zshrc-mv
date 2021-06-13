@@ -141,11 +141,32 @@ HISTSIZE=9999999
 SAVEHIST=$HISTSIZE
 unset HISTFILE
 
+# Support for hstr if available
+enable_hstr() {
+	(($+commands[hstr])) || return 0
+	local i
+	for i in $'\C-r' $'\e[1;5A'
+	do	bindkey -s $i $'\C-a  hstr -- \C-j'
+	done
+	[[ -n ${HSTR_CONFIG++} ]] || HSTR_CONFIG='hicolor,prompt-bottom'
+	export HSTR_CONFIG
+}
+
+disable_hstr() {
+	(($+commands[hstr])) || return 0
+	local i
+	for i in $'\C-r' $'\e[1;5A'
+	do	bindkey -r $i
+	done
+}
+
 # Call enable_history in after_zsh if you want a histfile.
 # This will also pick up changes saved in another terminal.
 enable_history() {
 	emulate -L zsh
 	typeset -g HISTFILE=$HOME/history
+	export HISTFILE # export to support commands like hstr
+	enable_hstr
 	fc -RI
 }
 
@@ -157,6 +178,7 @@ read_history() {
 
 disable_history() {
 	unset HISTFILE
+	disable_hstr
 }
 
 zshaddhistory() {
@@ -610,7 +632,6 @@ zshrc_bindkey kill-whole-line Ctrl-y Ctrl-x
 zshrc_bindkey kill-line-maybe Ctrl-d
 zshrc_bindkey yank Ctrl-v
 zshrc_bindkey quoted-insert Ctrl-t
-
 
 # Make files with certain extensions "executable" (man zshbuiltins#alias)
 # Actually, we use zsh-mime-setup to this purpose.
