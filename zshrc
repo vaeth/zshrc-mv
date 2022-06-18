@@ -749,14 +749,16 @@ zsh-mime-setup
 zshrc_fast_syntax_highlighting() {
 	(($+FAST_HIGHLIGHT_STYLES)) || () {
 		# fast-syntax-highlighting must not be in PATH when we source
-		local i j
+		local i j k
 		j=(${DEFAULTS:+${^DEFAULTS%/}{,/zsh}{/fast-syntax-highlighting,}}
 		${GITS:+${^GITS%/}{/fast-syntax-highlighting{.git,},}}
 		${EXPREFIX:+${^EPREFIX%/}/usr/share/zsh/site-{contrib,functions}{/fast-syntax-highlighting,}}
 		/usr/share/zsh/site-{contrib,functions}{/fast-syntax-highlighting,}
 		$path)
 		for i in $j
-		do	. $i/fast-syntax-highlighting.plugin.zsh NIL && return
+		do	for k in fast-syntax-highlighting.plugin.zsh F-Sy-H.plugin.zsh
+			do	. $i/$k NIL && return
+			done
 		done
 		return 1
 	} || return
